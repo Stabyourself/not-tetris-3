@@ -4,10 +4,8 @@ function game.load()
     local Well = require "class.Well"
     gamestate = game
 
-    game.targetAngle = 0
-
     game.wells = {}
-    table.insert(game.wells, Well:new(16, 0))
+    table.insert(game.wells, Well:new(95/8, 41/8, 10, 20))
 end
 
 function game.update(dt)

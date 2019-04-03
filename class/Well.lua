@@ -5,22 +5,24 @@ local Wall = require "class.Wall"
 local pieceTypes = require "class.pieceType"
 local Piece = require "class.Piece"
 
-function Well:initialize(x, y)
+function Well:initialize(x, y, columns, rows)
     self.x = x
     self.y = y
+    self.columns = columns
+    self.rows = rows
 
-    self.world = love.physics.newWorld(0, 50*PHYSICSSCALE)
+    self.world = love.physics.newWorld(0, GRAVITY*PHYSICSSCALE)
     self.world:setCallbacks(self.beginContact)
 
     self.walls = {}
-    table.insert(self.walls, Wall:new(self.world, 0, -5, 0, 18)) -- left
-    table.insert(self.walls, Wall:new(self.world, 10, -5, 10, 18)) -- right
-    table.insert(self.walls, Wall:new(self.world, 0, 18, 10, 18)) -- floor
+    table.insert(self.walls, Wall:new(self.world, self.x, self.y-5, 0, self.rows+5)) -- left
+    table.insert(self.walls, Wall:new(self.world, self.x+self.columns, self.y-5, 0, self.rows+5)) -- right
+    table.insert(self.walls, Wall:new(self.world, self.x, self.y+self.rows, self.columns, 0, PIECEFRICTION)) -- floor
 
     self.walls[1].dontDrop = true
     self.walls[2].dontDrop = true
 
-    self.targetAngle = 0
+    self.worldUpdateBuffer = 0
 
     self.pieces = {}
     self:nextPiece()
@@ -32,48 +34,30 @@ function Well:update(dt)
         self.spawnNewPieceNextFrame = false
     end
 
-    if love.keyboard.isDown("left") then
-        self.targetAngle = self.targetAngle - dt*3
-    elseif love.keyboard.isDown("right") then
-        self.targetAngle = self.targetAngle + dt*3
-    end
-
     if self.activePiece then
-        if love.keyboard.isDown("a") then
-            self.activePiece:move(-1)
-        end
-
-        if love.keyboard.isDown("d") then
-            self.activePiece:move(1)
-        end
-
-        if not love.keyboard.isDown("s") then
-            self.activePiece:limitDownwardVelocity()
-        end
-
-        self.activePiece:rotateTo(self.targetAngle)
+        self.activePiece:movement(dt)
     end
 
-    self.world:update(dt)
+    -- world is updated in fixed steps to prevent fps-dependency
+    self.worldUpdateBuffer = self.worldUpdateBuffer + dt
+
+    while self.worldUpdateBuffer >= WORLDUPDATEINTERVAL do
+        self.world:update(dt)
+        self.worldUpdateBuffer = self.worldUpdateBuffer - WORLDUPDATEINTERVAL
+    end
 end
 
 function Well:draw()
     love.graphics.draw(backgroundImg)
 
-    -- translate by the world offset for pieces
-    love.graphics.push()
-    love.graphics.translate(16, 0)
-
     for _, v in ipairs(self.pieces) do
         v:draw()
     end
-
-    love.graphics.pop()
 end
 
 function Well:nextPiece()
-    local pieceNum = math.random(1, #pieceTypes)
-    local piece = Piece:new(self, pieceTypes[pieceNum], self.targetAngle)
+    local pieceNum = love.math.random(1, #pieceTypes)
+    local piece = Piece:new(self, pieceTypes[pieceNum])
 
     self.activePiece = piece
 
@@ -106,7 +90,7 @@ function Well.beginContact(a, b)
         -- some velocity check here maybe
 
         if piece.body:getY() < 0 then
-            game.gameOver()
+            self:gameOver()
             return
         end
 
