@@ -6,6 +6,8 @@ function love.load()
     class = require "middleclass"
     local game = require "game"
 
+    love.graphics.setLineWidth(PHYSICSSCALE/8/SCALE)
+
     backgroundImg = love.graphics.newImage("img/background.png")
 
     game.load()
