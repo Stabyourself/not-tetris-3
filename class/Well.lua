@@ -34,15 +34,15 @@ function Well:update(dt)
         self.spawnNewPieceNextFrame = false
     end
 
-    if self.activePiece then
-        self.activePiece:movement(dt)
-    end
-
-    -- world is updated in fixed steps to prevent fps-dependency
+    -- world is updated in fixed steps to prevent fps-dependency (box2d behaves differently with different deltas, even if the total is the same)
     self.worldUpdateBuffer = self.worldUpdateBuffer + dt
 
     while self.worldUpdateBuffer >= WORLDUPDATEINTERVAL do
-        self.world:update(dt)
+        if self.activePiece then
+            self.activePiece:movement(WORLDUPDATEINTERVAL)
+        end
+
+        self.world:update(WORLDUPDATEINTERVAL)
         self.worldUpdateBuffer = self.worldUpdateBuffer - WORLDUPDATEINTERVAL
     end
 end

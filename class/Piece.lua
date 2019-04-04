@@ -1,5 +1,7 @@
 local Piece = class("Piece")
 
+local Block = require "class.Block"
+
 function Piece:initialize(well, pieceType)
     self.well = well
     self.pieceType = pieceType
@@ -9,15 +11,15 @@ function Piece:initialize(well, pieceType)
     self.body:setAngle(0)
     self.body:setBullet(true)
 
-    self.fixtures = {}
+    self.blocks = {}
 
     for x = 1, #self.pieceType.map do
         for y = 1, #self.pieceType.map[x] do
             if self.pieceType.map[x][y] then
-                local shape = love.physics.newRectangleShape((x-.5-#self.pieceType.map/2)*PHYSICSSCALE, (y-.5-#self.pieceType.map[x]/2)*PHYSICSSCALE, 1*PHYSICSSCALE, 1*PHYSICSSCALE)
-                local fixture = love.physics.newFixture(self.body, shape)
+                local block = Block:new(x-1-#self.pieceType.map/2, y-1-#self.pieceType.map[x]/2, self.pieceType.map[x][y])
+                local fixture = love.physics.newFixture(self.body, block.shape)
                 fixture:setFriction(PIECEFRICTION)
-                table.insert(self.fixtures, fixture)
+                table.insert(self.blocks, block)
             end
         end
     end
@@ -39,7 +41,9 @@ function Piece:draw()
     love.graphics.translate(self.body:getX()*PIECESCALE/PHYSICSSCALE, self.body:getY()*PIECESCALE/PHYSICSSCALE)
     love.graphics.rotate(self.body:getAngle())
 
-    self.pieceType:draw()
+    for _, block in ipairs(self.blocks) do
+        block:draw()
+    end
 
     love.graphics.pop()
 end

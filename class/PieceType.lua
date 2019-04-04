@@ -2,9 +2,14 @@ local PieceType = class("PieceType")
 
 local img = love.graphics.newImage("img/tiles/0.png")
 
-function PieceType:initialize(map, quad)
+local quads = {}
+
+for i = 0, 2 do
+    quads[tostring(i+1)] = love.graphics.newQuad(i*10+1, 1, 8, 8, 30, 10)
+end
+
+function PieceType:initialize(map)
     self.map = map
-    self.quad = quad
 
     -- convert to array before sending so we don't have to do it all the time
     self.map = {}
@@ -16,8 +21,8 @@ function PieceType:initialize(map, quad)
 
             local char = map[y]:sub(x, x)
 
-            if char == "#" then
-                self.map[x][y] = true
+            if char ~= " " then
+                self.map[x][y] = quads[char]
             else
                 self.map[x][y] = false
             end
@@ -25,88 +30,54 @@ function PieceType:initialize(map, quad)
     end
 end
 
-function PieceType:draw()
-    love.graphics.push()
-    love.graphics.translate(-#self.map*4, -#self.map[1]*4)
-
-    for x = 1, #self.map do
-        for y = 1, #self.map[x] do
-            if self.map[x][y] then
-                love.graphics.draw(img, self.quad, (x-1)*8, (y-1)*8)
-            end
-        end
-    end
-    love.graphics.pop()
-end
-
-local quads = {}
-
-for i = 0, 2 do
-    table.insert(quads, love.graphics.newQuad(i*10+1, 1, 8, 8, 30, 10))
-end
-
 local pieceTypes = {}
 
 table.insert(pieceTypes, PieceType:new(
     {
-        "###",
-        " # ",
-    },
-
-    quads[1]
+        "111",
+        " 1 ",
+    }
 ))
 
 table.insert(pieceTypes, PieceType:new(
     {
-        "###",
-        "  #",
-    },
-
-    quads[3]
+        "333",
+        "  3",
+    }
 ))
 
 table.insert(pieceTypes, PieceType:new(
     {
-        "## ",
-        " ##"
-    },
-
-    quads[2]
+        "22 ",
+        " 22"
+    }
 ))
 
 table.insert(pieceTypes, PieceType:new(
     {
-        "##",
-        "##",
-    },
-
-    quads[1]
+        "11",
+        "11",
+    }
 ))
 
 table.insert(pieceTypes, PieceType:new(
     {
-        " ##",
-        "## ",
-    },
-
-    quads[3]
+        " 33",
+        "33 ",
+    }
 ))
 
 table.insert(pieceTypes, PieceType:new(
     {
-        "###",
-        "#  ",
-    },
-
-    quads[2]
+        "222",
+        "2  ",
+    }
 ))
 
 table.insert(pieceTypes, PieceType:new(
     {
-        "####",
-    },
-
-    quads[1]
+        "1111",
+    }
 ))
 
 return pieceTypes
