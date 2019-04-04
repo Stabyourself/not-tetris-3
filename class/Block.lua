@@ -6,21 +6,25 @@ function Block:initialize(x, y, quad)
     self.x = x
     self.y = y
     self.quad = quad
-    local S = PHYSICSSCALE
-    self.shape = love.physics.newPolygonShape(
-        (x+DIAMONDADD)*S, (y)*S, -- clockwise, starting top leftish
-        (x+1-DIAMONDADD)*S, (y)*S,
-        (x+1)*S, (y+DIAMONDADD)*S,
-        (x+1)*S, (y+1-DIAMONDADD)*S,
-        (x+1-DIAMONDADD)*S, (y+1)*S,
-        (x+DIAMONDADD)*S, (y+1)*S,
-        (x)*S, (y+1-DIAMONDADD)*S,
-        (x)*S, (y+DIAMONDADD)*S
-    )
+
+    if DIAMONDADD > 0 then
+        self.shape = love.physics.newPolygonShape(
+            x+DIAMONDADD, y, -- clockwise, starting top leftish
+            x+1-DIAMONDADD, y,
+            x+1, y+DIAMONDADD,
+            x+1, y+1-DIAMONDADD,
+            x+1-DIAMONDADD, y+1,
+            x+DIAMONDADD, y+1,
+            x, y+1-DIAMONDADD,
+            x, y+DIAMONDADD
+        )
+    else
+        self.shape = love.physics.newRectangleShape((x+.5)*PHYSICSSCALE, (y+.5)*PHYSICSSCALE, PHYSICSSCALE, PHYSICSSCALE)
+    end
 end
 
 function Block:draw()
-    love.graphics.draw(img, self.quad, self.x*8, self.y*8)
+    love.graphics.draw(img, self.quad, self.x*PHYSICSSCALE, self.y*PHYSICSSCALE, 0, PHYSICSSCALE/PIECESCALE)
 end
 
 return Block

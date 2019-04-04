@@ -11,13 +11,13 @@ function Well:initialize(x, y, columns, rows)
     self.columns = columns
     self.rows = rows
 
-    self.world = love.physics.newWorld(0, GRAVITY*PHYSICSSCALE)
+    self.world = love.physics.newWorld(0, GRAVITY)
     self.world:setCallbacks(self.beginContact)
 
     self.walls = {}
-    table.insert(self.walls, Wall:new(self.world, self.x, self.y-5, 0, self.rows+5)) -- left
-    table.insert(self.walls, Wall:new(self.world, self.x+self.columns, self.y-5, 0, self.rows+5)) -- right
-    table.insert(self.walls, Wall:new(self.world, self.x, self.y+self.rows, self.columns, 0, PIECEFRICTION)) -- floor
+    table.insert(self.walls, Wall:new(self.world, self.x, self.y-5*PHYSICSSCALE, 0, (self.rows+5)*PHYSICSSCALE, WALLFRICTION)) -- left
+    table.insert(self.walls, Wall:new(self.world, self.x+self.columns*PHYSICSSCALE, self.y-5*PHYSICSSCALE, 0, (self.rows+5)*PHYSICSSCALE, WALLFRICTION)) -- right
+    table.insert(self.walls, Wall:new(self.world, self.x, self.y+self.rows*PHYSICSSCALE, self.columns*PHYSICSSCALE, 0, FLOORFRICTION)) -- floor
 
     self.walls[1].dontDrop = true
     self.walls[2].dontDrop = true

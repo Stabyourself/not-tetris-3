@@ -6,7 +6,7 @@ function game.load()
     gamestate = game
 
     game.wells = {}
-    table.insert(game.wells, Well:new(95/8, 41/8, 10.25, 20))
+    table.insert(game.wells, Well:new(95/8*PHYSICSSCALE, 41/8*PHYSICSSCALE, 10.25, 20))
 end
 
 function game.update(dt)
@@ -25,10 +25,9 @@ function game.draw()
         for _, well in ipairs(game.wells) do
             for _, piece in ipairs(well.pieces) do
                 love.graphics.push()
-                love.graphics.scale(1/PHYSICSSCALE*8, 1/PHYSICSSCALE*8)
+                love.graphics.scale(1/PHYSICSSCALE*PIECESCALE, 1/PHYSICSSCALE*PIECESCALE)
                 love.graphics.translate(piece.body:getPosition())
                 love.graphics.rotate(piece.body:getAngle())
-                love.graphics.translate(-0.5, -0.5)
 
                 for _, fixture in ipairs(piece.body:getFixtures()) do -- this is good code, I promise
                     love.graphics.polygon("line", fixture:getShape():getPoints())

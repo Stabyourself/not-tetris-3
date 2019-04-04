@@ -6,10 +6,10 @@ function Piece:initialize(well, pieceType)
     self.well = well
     self.pieceType = pieceType
 
-    self.body = love.physics.newBody(well.world, (self.well.x+PIECESTARTX)*PHYSICSSCALE, (self.well.y+PIECESTARTY)*PHYSICSSCALE, "dynamic")
+    self.body = love.physics.newBody(well.world, self.well.x+PIECESTARTX, self.well.y+PIECESTARTY, "dynamic")
     self.body:setUserData(self)
     self.body:setAngle(0)
-    self.body:setBullet(true)
+    -- self.body:setBullet(true)
 
     self.blocks = {}
 
@@ -38,7 +38,8 @@ end
 
 function Piece:draw()
     love.graphics.push()
-    love.graphics.translate(self.body:getX()*PIECESCALE/PHYSICSSCALE, self.body:getY()*PIECESCALE/PHYSICSSCALE)
+    love.graphics.scale(1/PHYSICSSCALE*PIECESCALE, 1/PHYSICSSCALE*PIECESCALE)
+    love.graphics.translate(self.body:getX(), self.body:getY())
     love.graphics.rotate(self.body:getAngle())
 
     for _, block in ipairs(self.blocks) do
@@ -73,11 +74,11 @@ function Piece:movement(dt)
 end
 
 function Piece:move(dir)
-    self.body:applyForce(MOVEFORCE*PHYSICSSCALE*dir, 0)
+    self.body:applyForce(MOVEFORCE*dir, 0)
 end
 
 function Piece:rotate(dir)
-    self.body:applyTorque(ROTATEFORCE*PHYSICSSCALE*dir, 0)
+    self.body:applyTorque(ROTATEFORCE*dir, 0)
 end
 
 return Piece
