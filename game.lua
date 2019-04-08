@@ -1,43 +1,26 @@
 local game = {}
-local Well
+local Playfield
 
 function game.load()
-    Well = require "class.Well"
+    Playfield = require "class.Playfield"
     gamestate = game
 
-    game.wells = {}
-    table.insert(game.wells, Well:new(95/8*PHYSICSSCALE, 41/8*PHYSICSSCALE, 10.25, 20))
+    game.playfields = {}
+    table.insert(game.playfields, Playfield:new(95, 41, 10.25, 20))
 end
 
 function game.update(dt)
-    updateGroup(game.wells, dt)
+    updateGroup(game.playfields, dt)
 end
 
 function game.draw()
-    for _, well in ipairs(game.wells) do
-        well:draw()
+    love.graphics.draw(backgroundImg)
+
+    for _, playfield in ipairs(game.playfields) do
+        playfield:draw()
     end
 
     love.graphics.print(love.timer.getFPS())
-
-    if DEBUGDRAW then
-        love.graphics.setColor(1, 0, 0)
-        for _, well in ipairs(game.wells) do
-            for _, piece in ipairs(well.pieces) do
-                love.graphics.push()
-                love.graphics.scale(1/PHYSICSSCALE*PIECESCALE, 1/PHYSICSSCALE*PIECESCALE)
-                love.graphics.translate(piece.body:getPosition())
-                love.graphics.rotate(piece.body:getAngle())
-
-                for _, fixture in ipairs(piece.body:getFixtures()) do -- this is good code, I promise
-                    love.graphics.polygon("line", fixture:getShape():getPoints())
-                end
-
-                love.graphics.pop()
-            end
-        end
-        love.graphics.setColor(1, 1, 1)
-    end
 end
 
 function game.keypressed()

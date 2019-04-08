@@ -2,11 +2,11 @@ local Piece = class("Piece")
 
 local Block = require "class.Block"
 
-function Piece:initialize(well, pieceType)
-    self.well = well
+function Piece:initialize(playfield, pieceType)
+    self.playfield = playfield
     self.pieceType = pieceType
 
-    self.body = love.physics.newBody(well.world, self.well.x+PIECESTARTX, self.well.y+PIECESTARTY, "dynamic")
+    self.body = love.physics.newBody(playfield.world, PIECESTARTX, PIECESTARTY, "dynamic")
     self.body:setUserData(self)
     self.body:setAngle(0)
     -- self.body:setBullet(true)

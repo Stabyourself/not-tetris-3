@@ -8,6 +8,7 @@ function Block:initialize(x, y, quad)
     self.quad = quad
 
     if DIAMONDADD > 0 then
+        error("DIAMONDADD support broke.")
         self.shape = love.physics.newPolygonShape(
             x+DIAMONDADD, y, -- clockwise, starting top leftish
             x+1-DIAMONDADD, y,
