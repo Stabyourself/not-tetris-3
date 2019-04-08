@@ -16,9 +16,7 @@ function Piece:initialize(playfield, pieceType)
     for x = 1, #self.pieceType.map do
         for y = 1, #self.pieceType.map[x] do
             if self.pieceType.map[x][y] then
-                local block = Block:new(x-1-#self.pieceType.map/2, y-1-#self.pieceType.map[x]/2, self.pieceType.map[x][y])
-                local fixture = love.physics.newFixture(self.body, block.shape)
-                fixture:setFriction(PIECEFRICTION)
+                local block = Block:new(self, x-1-#self.pieceType.map/2, y-1-#self.pieceType.map[x]/2, self.pieceType.map[x][y])
                 table.insert(self.blocks, block)
             end
         end

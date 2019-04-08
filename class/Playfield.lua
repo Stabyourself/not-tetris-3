@@ -72,6 +72,20 @@ function Playfield:draw()
         v:draw()
     end
 
+    if DRAWME then
+        love.graphics.push()
+        love.graphics.scale(1/PHYSICSSCALE*PIECESCALE, 1/PHYSICSSCALE*PIECESCALE)
+        love.graphics.setColor(0, 1, 0)
+        for _, v in ipairs(DRAWME) do
+            for _, points in pairs(v) do
+                love.graphics.line(points)
+                love.graphics.line(points[#points-1], points[#points], points[1], points[2])
+            end
+        end
+        love.graphics.setColor(1, 1, 1)
+        love.graphics.pop()
+    end
+
     if DEBUGDRAW then
         love.graphics.setColor(1, 0, 0)
         for _, piece in ipairs(self.pieces) do
@@ -92,7 +106,16 @@ function Playfield:draw()
     love.graphics.pop()
 end
 
+function Playfield:worldToRow(y)
+    return math.ceil(y/PHYSICSSCALE)
+end
+
+function Playfield:rowToWorld(y)
+    return y*PHYSICSSCALE
+end
+
 function Playfield:updateLines()
+    DRAWME = {}
     for i = 1, self.rows do
         self.lineCoverage[i] = 0
     end
@@ -102,10 +125,98 @@ function Playfield:updateLines()
             -- doing all of this inline because I expect this to be performance-important code
             -- can be broken up later
 
-            local topRow, bottomRow
+            -- Get top and bottom most row that this block is in
+            local topRow = math.huge
+            local bottomRow = -1
             local points = {piece.body:getWorldPoints(block.shape:getPoints())}
 
-            print_r(points)
+            for i = 1, #points, 2 do
+                local x, y = points[i], points[i+1]
+
+                topRow = math.min(topRow, self:worldToRow(y))
+                bottomRow = math.max(bottomRow, self:worldToRow(y))
+            end
+
+            -- raytrace the points at which this block crosses lines
+            local rayTraceResults = {left={}, right={}}
+
+            for row = topRow, bottomRow-1 do
+                -- FROM LEFT
+                local x1 = 0
+                local x2 = self.columns*PHYSICSSCALE
+                local y1 = self:rowToWorld(row)
+                local y2 = self:rowToWorld(row)
+
+                local xn, yn, fraction = block.fixture:rayCast(x1, y1, x2, y2, 1)
+
+                local hitx = x1 + (x2 - x1) * fraction
+                -- local hity = y1 + (y2 - y1) * fraction
+
+                rayTraceResults.left[row] = hitx
+
+                -- FROM RIGHT
+                local x1 = self.columns*PHYSICSSCALE
+                local x2 = 0
+
+                local xn, yn, fraction = block.fixture:rayCast(x1, y1, x2, y2, 1)
+
+                local hitx = x1 + (x2 - x1) * fraction
+                -- local hity = y1 + (y2 - y1) * fraction
+
+                rayTraceResults.right[row] = hitx
+            end
+
+            local subShapes = {}
+            local previousRow = false
+
+            local function doPoint(x, y, add)
+                local row = self:worldToRow(y)
+
+                if not subShapes[row] then
+                    subShapes[row] = {}
+                end
+
+                if not previousRow then
+                    previousRow = row
+                end
+
+                if row > previousRow then -- we just went into the next row
+                    -- add exit point to previous row
+                    table.insert(subShapes[previousRow], rayTraceResults.right[previousRow])
+                    table.insert(subShapes[previousRow], self:rowToWorld(previousRow))
+
+                    -- add entry point to current row
+                    table.insert(subShapes[row], rayTraceResults.right[previousRow])
+                    table.insert(subShapes[row], self:rowToWorld(previousRow))
+                end
+
+                if row < previousRow then -- we just went into the previous row
+                    -- add exit point to previous row
+                    table.insert(subShapes[previousRow], rayTraceResults.left[row])
+                    table.insert(subShapes[previousRow], self:rowToWorld(row))
+
+                    -- add entry point to current row
+                    table.insert(subShapes[row], rayTraceResults.left[row])
+                    table.insert(subShapes[row], self:rowToWorld(row))
+                end
+
+                if add then
+                    table.insert(subShapes[row], x)
+                    table.insert(subShapes[row], y)
+                end
+
+                previousRow = row
+            end
+
+            for i = 1, #points, 2 do
+                local x, y = points[i], points[i+1]
+
+                doPoint(x, y, true)
+            end
+
+            doPoint(points[1], points[2], false) -- go back to first point for the adding of the additional points on the rows
+
+            table.insert(DRAWME, subShapes)
         end
     end
 end

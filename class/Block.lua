@@ -2,7 +2,8 @@ local Block = class("Block")
 
 local img = love.graphics.newImage("img/tiles/0.png")
 
-function Block:initialize(x, y, quad)
+function Block:initialize(piece, x, y, quad)
+    self.piece = piece
     self.x = x
     self.y = y
     self.quad = quad
@@ -22,6 +23,9 @@ function Block:initialize(x, y, quad)
     else
         self.shape = love.physics.newRectangleShape((x+.5)*PHYSICSSCALE, (y+.5)*PHYSICSSCALE, PHYSICSSCALE, PHYSICSSCALE)
     end
+
+    self.fixture = love.physics.newFixture(self.piece.body, self.shape)
+    self.fixture:setFriction(PIECEFRICTION)
 end
 
 function Block:draw()
