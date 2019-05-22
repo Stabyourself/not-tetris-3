@@ -79,4 +79,15 @@ function Piece:rotate(dir)
     self.body:applyTorque(ROTATEFORCE*dir, 0)
 end
 
+function Piece:removeBlock(removeBlock)
+    for i = #self.blocks, 1, -1 do
+        local block = self.blocks[i]
+
+        if block == removeBlock then
+            print("!")
+            table.remove(self.blocks, i)
+        end
+    end
+end
+
 return Piece

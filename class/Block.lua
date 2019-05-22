@@ -32,4 +32,31 @@ function Block:draw()
     love.graphics.draw(img, self.quad, self.x*PHYSICSSCALE, self.y*PHYSICSSCALE, 0, PHYSICSSCALE/PIECESCALE)
 end
 
+function Block:cut(row)
+    local removeMe = true
+
+    if #self.subShapes > 0 then
+        for i = #self.subShapes, 1, -1 do
+            subShape = self.subShapes[i]
+
+            if subShape.row == row then
+                table.remove(self.subShapes, i)
+
+            else
+                self.fixture:destroy()
+                self.shape = love.physics.newPolygonShape(subShape.shape)
+                self.fixture = love.physics.newFixture(self.piece.body, self.shape)
+                self.fixture:setFriction(PIECEFRICTION)
+
+                removeMe = false
+            end
+        end
+    end
+
+    if #self.subShapes == 0 then
+        self.fixture:destroy()
+        self.piece:removeBlock(self)
+    end
+end
+
 return Block
