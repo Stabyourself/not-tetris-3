@@ -84,15 +84,14 @@ function Piece:removeBlock(removeBlock)
         local block = self.blocks[i]
 
         if block == removeBlock then
-            print("!")
             table.remove(self.blocks, i)
         end
     end
 end
 
-function Piece:cut(row)
+function Piece:cut(rows)
     for _, block in ipairs(self.blocks) do
-        block:cut()
+        block:cut(rows)
     end
 end
 
@@ -102,9 +101,8 @@ function Piece:debugDraw()
     love.graphics.translate(self.body:getPosition())
     love.graphics.rotate(self.body:getAngle())
 
-    for _, fixture in ipairs(self.body:getFixtures()) do
-        local points = {fixture:getShape():getPoints()}
-        love.graphics.line(points[#points-1], points[#points], unpack(points))
+    for _, block in ipairs(self.blocks) do
+        block:debugDraw()
     end
 
     love.graphics.pop()

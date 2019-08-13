@@ -9,7 +9,7 @@ function Block:initialize(piece, x, y, quad)
     self.quad = quad
 
     if DIAMONDADD > 0 then
-        error("DIAMONDADD support broke.")
+        error("DIAMONDADD support broke lol.")
         self.shape = love.physics.newPolygonShape(
             x+DIAMONDADD, y, -- clockwise, starting top leftish
             x+1-DIAMONDADD, y,
@@ -32,26 +32,39 @@ function Block:draw()
     love.graphics.draw(img, self.quad, self.x*PHYSICSSCALE, self.y*PHYSICSSCALE, 0, PHYSICSSCALE/PIECESCALE)
 end
 
-function Block:cut(row)
-    local removeMe = true
+function Block:debugDraw()
+    -- local points = {self.fixture:getShape():getPoints()}
+    -- love.graphics.line(points[#points-1], points[#points], unpack(points))
 
-    if #self.subShapes > 0 then
-        for _, subShape in ipairs(self.subShapes) do
-            if subShape.row == row then
-                table.remove(self.subShapes, i)
+    for _, subShape in ipairs(self.subShapes) do
+        if subShape.row%2 == 1 then
+            love.graphics.setColor(1, 0, 0)
+        else
+            love.graphics.setColor(0, 1, 0)
+        end
 
-            else
-                self.fixture:destroy()
-                self.shape = love.physics.newPolygonShape(subShape.shape)
-                self.fixture = love.physics.newFixture(self.piece.body, self.shape)
-                self.fixture:setFriction(PIECEFRICTION)
+        for i = 1, #subShape.shape-2, 2 do
+            love.graphics.line(subShape.shape[i], subShape.shape[i+1], subShape.shape[i+2], subShape.shape[i+3])
+        end
+        love.graphics.line(subShape.shape[#subShape.shape-1], subShape.shape[#subShape.shape], subShape.shape[1], subShape.shape[2])
+    end
+end
 
-                removeMe = false
-            end
+function Block:cut(rows)
+    for _, subShape in ipairs(self.subShapes) do
+        if inTable(rows, subShape.row) then
+            table.remove(self.subShapes, i)
         end
     end
 
-    if #self.subShapes == 0 then
+    if #self.subShapes > 0 then
+        for _, subShape in ipairs(self.subShapes) do
+            self.fixture:destroy()
+            self.shape = love.physics.newPolygonShape(subShape.shape)
+            self.fixture = love.physics.newFixture(self.piece.body, self.shape)
+            self.fixture:setFriction(PIECEFRICTION)
+        end
+    else
         self.fixture:destroy()
         self.piece:removeBlock(self)
     end
@@ -69,8 +82,10 @@ function Block:setSubShapes()
     for i = 1, #points, 2 do
         local x, y = points[i], points[i+1]
 
-        topRow = math.min(topRow, self.piece.playfield:worldToRow(y))
-        bottomRow = math.max(bottomRow, self.piece.playfield:worldToRow(y))
+        -- print
+
+        topRow = math.min(topRow, math.floor(y/PHYSICSSCALE)+1)
+        bottomRow = math.max(bottomRow, math.ceil(y/PHYSICSSCALE))
     end
 
     -- raytrace the points at which this block crosses lines

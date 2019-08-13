@@ -23,8 +23,10 @@ function game.draw()
     love.graphics.print(love.timer.getFPS())
 end
 
-function game.keypressed()
-
+function game.keypressed(key, unicode)
+    for _, playfield in ipairs(game.playfields) do
+        playfield:keypressed(key, unicode)
+    end
 end
 
 return game

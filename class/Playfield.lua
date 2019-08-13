@@ -28,30 +28,31 @@ function Playfield:initialize(x, y, columns, rows)
 
     self.pieces = {}
     self:nextPiece()
+    self:updateLines()
 end
 
 local bla = false
 
 function Playfield:update(dt)
-    if self.spawnNewPieceNextFrame then
-        self:clearRow(19)
-        self:nextPiece()
-        self.spawnNewPieceNextFrame = false
-    end
-
     -- world is updated in fixed steps to prevent fps-dependency (box2d behaves differently with different deltas, even if the total is the same)
     self.worldUpdateBuffer = self.worldUpdateBuffer + dt
 
     while self.worldUpdateBuffer >= WORLDUPDATEINTERVAL do
+        if self.spawnNewPieceNextFrame then
+            self:clearRow({19})
+            self:nextPiece()
+            self.spawnNewPieceNextFrame = false
+        end
+
         if self.activePiece then
             self.activePiece:movement(WORLDUPDATEINTERVAL)
         end
 
         self.world:update(WORLDUPDATEINTERVAL)
         self.worldUpdateBuffer = self.worldUpdateBuffer - WORLDUPDATEINTERVAL
-    end
 
-    self:updateLines()
+        self:updateLines()
+    end
 end
 
 function Playfield:draw()
@@ -145,10 +146,14 @@ function Playfield.postSolve(a, b)
     end
 end
 
-function Playfield:clearRow(row)
+function Playfield:clearRow(rows)
     for _, piece in ipairs(self.pieces) do
-        piece:cut(row)
+        piece:cut(rows)
     end
+end
+
+function Playfield:keypressed(key, unicode)
+
 end
 
 return Playfield

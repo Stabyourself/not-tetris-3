@@ -34,3 +34,12 @@ function print_r (t, name, indent) -- Credits to http://www.hpelbers.org/lua/pri
     end
     print(table_r(t,name or 'Value',indent or ''))
 end
+
+function inTable(t, needle)
+	for i, v in pairs(t) do
+		if v == needle then
+			return i
+		end
+	end
+	return false
+end
