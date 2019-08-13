@@ -90,4 +90,24 @@ function Piece:removeBlock(removeBlock)
     end
 end
 
+function Piece:cut(row)
+    for _, block in ipairs(self.blocks) do
+        block:cut()
+    end
+end
+
+function Piece:debugDraw()
+    love.graphics.push()
+    love.graphics.scale(1/PHYSICSSCALE*PIECESCALE, 1/PHYSICSSCALE*PIECESCALE)
+    love.graphics.translate(self.body:getPosition())
+    love.graphics.rotate(self.body:getAngle())
+
+    for _, fixture in ipairs(self.body:getFixtures()) do
+        local points = {fixture:getShape():getPoints()}
+        love.graphics.line(points[#points-1], points[#points], unpack(points))
+    end
+
+    love.graphics.pop()
+end
+
 return Piece
