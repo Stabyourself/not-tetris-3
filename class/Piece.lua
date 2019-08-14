@@ -37,7 +37,7 @@ end
 function Piece:draw()
     love.graphics.push()
     love.graphics.scale(1/PHYSICSSCALE*PIECESCALE, 1/PHYSICSSCALE*PIECESCALE)
-    love.graphics.translate(self.body:getX(), self.body:getY())
+    love.graphics.translate(self.body:getPosition())
     love.graphics.rotate(self.body:getAngle())
 
     for _, block in ipairs(self.blocks) do
@@ -45,6 +45,12 @@ function Piece:draw()
     end
 
     love.graphics.pop()
+end
+
+function Piece:update(dt)
+    for _, block in ipairs(self.blocks) do
+        block:update(dt)
+    end
 end
 
 function Piece:movement(dt)
@@ -93,19 +99,6 @@ function Piece:cut(rows)
     for _, block in ipairs(self.blocks) do
         block:cut(rows)
     end
-end
-
-function Piece:debugDraw()
-    love.graphics.push()
-    love.graphics.scale(1/PHYSICSSCALE*PIECESCALE, 1/PHYSICSSCALE*PIECESCALE)
-    love.graphics.translate(self.body:getPosition())
-    love.graphics.rotate(self.body:getAngle())
-
-    for _, block in ipairs(self.blocks) do
-        block:debugDraw()
-    end
-
-    love.graphics.pop()
 end
 
 return Piece

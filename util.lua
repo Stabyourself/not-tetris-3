@@ -43,3 +43,127 @@ function inTable(t, needle)
 	end
 	return false
 end
+
+function polygonarea(coords) --calculates the area of a polygon
+	--Also written by Adam (see below)
+	local anchorX = coords[1]
+	local anchorY = coords[2]
+
+	local firstX = coords[3]
+	local firstY = coords[4]
+
+	local area = 0
+
+	for i = 5, #coords - 1, 2 do
+		local x = coords[i]
+		local y = coords[i + 1]
+
+		area = area + (math.abs(anchorX * firstY + firstX * y + x * anchorY
+				- anchorX * y - firstX * anchorY - x * firstY) / 2)
+
+		firstX = x
+		firstY = y
+
+	end
+	return area
+end
+
+function largeenough(coords) --checks if a polygon is good enough for box2d's snobby standards.
+	--Written by Adam/earthHunter
+
+	-- Calculation of centroids of each triangle
+
+	local centroids = {}
+
+	local anchorX = coords[1]
+	local anchorY = coords[2]
+
+	local firstX = coords[3]
+	local firstY = coords[4]
+
+	for i = 5, #coords - 1, 2 do
+
+		local x = coords[i]
+		local y = coords[i + 1]
+
+		local centroidX = (anchorX + firstX + x) / 3
+		local centroidY = (anchorY + firstY + y) / 3
+
+		local area = math.abs(anchorX * firstY + firstX * y + x * anchorY
+				- anchorX * y - firstX * anchorY - x * firstY) / 2
+
+		local index = 3 * (i - 3) / 2 - 2
+
+		centroids[index] = area
+		centroids[index + 1] = centroidX * area
+		centroids[index + 2] = centroidY * area
+
+		firstX = x
+		firstY = y
+
+	end
+
+	-- Calculation of polygon's centroid
+
+	local totalArea = 0
+	local centroidX = 0
+	local centroidY = 0
+
+	for i = 1, #centroids - 2, 3 do
+
+		totalArea = totalArea + centroids[i]
+		centroidX = centroidX + centroids[i + 1]
+		centroidY = centroidY + centroids[i + 2]
+
+	end
+
+	centroidX = centroidX / totalArea
+	centroidY = centroidY / totalArea
+
+	-- Calculation of normals
+
+	local normals = {}
+
+	for i = 1, #coords - 1, 2 do
+
+		local i2 = i + 2
+
+		if (i2 > #coords) then
+
+			i2 = 1
+
+		end
+
+		local tangentX = coords[i2] - coords[i]
+		local tangentY = coords[i2 + 1] - coords[i + 1]
+		local tangentLen = math.sqrt(tangentX * tangentX + tangentY * tangentY)
+
+		tangentX = tangentX / tangentLen
+		tangentY = tangentY / tangentLen
+
+		normals[i] = tangentY
+		normals[i + 1] = -tangentX
+
+	end
+
+	-- Projection of vertices in the normal directions
+	-- in order to obtain the distance from the centroid
+	-- to each side
+
+	-- If a side is too close, the polygon will crash the game
+  for i = 1, #coords - 1, 2 do
+
+		local projection = (coords[i] - centroidX) * normals[i]
+				+ (coords[i + 1] - centroidY) * normals[i + 1]
+
+		if (projection < 0.04*METER) then
+
+			return false
+
+		end
+
+	end
+
+	return true
+
+end

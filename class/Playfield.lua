@@ -53,6 +53,10 @@ function Playfield:update(dt)
 
         self:updateLines()
     end
+
+    for _, piece in ipairs(self.pieces) do
+        piece:update(dt)
+    end
 end
 
 function Playfield:draw()
@@ -74,19 +78,11 @@ function Playfield:draw()
         v:draw()
     end
 
-    if DEBUGDRAW then
-        love.graphics.setColor(1, 0, 0)
-        for _, piece in ipairs(self.pieces) do
-            piece:debugDraw()
-        end
-        love.graphics.setColor(1, 1, 1)
-    end
-
     love.graphics.pop()
 end
 
 function Playfield:worldToRow(y)
-    return math.ceil(y/PHYSICSSCALE)
+    return math.floor(y/PHYSICSSCALE)+1
 end
 
 function Playfield:rowToWorld(y)

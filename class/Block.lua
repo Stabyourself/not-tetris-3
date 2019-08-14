@@ -28,25 +28,51 @@ function Block:initialize(piece, x, y, quad)
     self.fixture:setFriction(PIECEFRICTION)
 end
 
+function Block:update(dt)
+
+end
+
 function Block:draw()
-    love.graphics.draw(img, self.quad, self.x*PHYSICSSCALE, self.y*PHYSICSSCALE, 0, PHYSICSSCALE/PIECESCALE)
+    if not DEBUG_HIDEBLOCKS then
+        love.graphics.draw(img, self.quad, self.x*PHYSICSSCALE, self.y*PHYSICSSCALE, 0, PHYSICSSCALE/PIECESCALE)
+    end
+
+    self:debugDraw()
 end
 
 function Block:debugDraw()
-    -- local points = {self.fixture:getShape():getPoints()}
-    -- love.graphics.line(points[#points-1], points[#points], unpack(points))
+    if DEBUG_DRAWSUBSHAPES then
+        for _, subShape in ipairs(self.subShapes) do
+            if subShape.row%2 == 1 then
+                love.graphics.setColor(1, 0, 0)
+            else
+                love.graphics.setColor(0, 1, 0)
+            end
 
-    for _, subShape in ipairs(self.subShapes) do
-        if subShape.row%2 == 1 then
-            love.graphics.setColor(1, 0, 0)
-        else
-            love.graphics.setColor(0, 1, 0)
+            for i = 1, #subShape.shape-2, 2 do
+                love.graphics.line(subShape.shape[i], subShape.shape[i+1], subShape.shape[i+2], subShape.shape[i+3])
+            end
+            love.graphics.line(subShape.shape[#subShape.shape-1], subShape.shape[#subShape.shape], subShape.shape[1], subShape.shape[2])
         end
+    end
 
-        for i = 1, #subShape.shape-2, 2 do
-            love.graphics.line(subShape.shape[i], subShape.shape[i+1], subShape.shape[i+2], subShape.shape[i+3])
+    if DEBUG_DRAWSHAPES then
+        love.graphics.setColor(0, 0, 1)
+        local points = {self.fixture:getShape():getPoints()}
+        for i = 1, #points-2, 2 do
+            love.graphics.line(points[i], points[i+1], points[i+2], points[i+3])
         end
-        love.graphics.line(subShape.shape[#subShape.shape-1], subShape.shape[#subShape.shape], subShape.shape[1], subShape.shape[2])
+        love.graphics.line(points[#points-1], points[#points], points[1], points[2])
+
+        love.graphics.setColor(1, 1, 1)
+    end
+
+    if DEBUG_DRAWSUBSHAPEUPDATETIME then
+        for _, subShape in ipairs(self.subShapes) do
+            local t = string.format("%.3f", love.timer.getTime() - subShape.timeUpdated)
+
+            love.graphics.print(t, subShape.shape[1], subShape.shape[2])
+        end
     end
 end
 
@@ -59,10 +85,17 @@ function Block:cut(rows)
 
     if #self.subShapes > 0 then
         for _, subShape in ipairs(self.subShapes) do
-            self.fixture:destroy()
-            self.shape = love.physics.newPolygonShape(subShape.shape)
-            self.fixture = love.physics.newFixture(self.piece.body, self.shape)
-            self.fixture:setFriction(PIECEFRICTION)
+            if largeenough(subShape.shape) then
+                -- limit vertices to 8 TODO: bad?
+                for i = #subShape.shape, 17, -1 do
+                    subShape.shape[i] = nil
+                end
+
+                self.fixture:destroy()
+                self.shape = love.physics.newPolygonShape(subShape.shape)
+                self.fixture = love.physics.newFixture(self.piece.body, self.shape)
+                self.fixture:setFriction(PIECEFRICTION)
+            end
         end
     else
         self.fixture:destroy()
@@ -160,9 +193,7 @@ function Block:setSubShapes()
     end
 
     for i = 1, #points, 2 do
-        local x, y = points[i], points[i+1]
-
-        doPoint(x, y, true)
+        doPoint(points[i], points[i+1], true)
     end
 
     doPoint(points[1], points[2], false) -- go back to first point for the adding of the additional points on the rows
@@ -181,7 +212,8 @@ function Block:setSubShapes()
         table.insert(self.subShapes,
             {
                 row=row,
-                shape=subShape
+                shape=subShape,
+                timeUpdated=love.timer.getTime()
             }
         )
     end
