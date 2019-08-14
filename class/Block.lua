@@ -86,24 +86,34 @@ function Block:cut(rows)
     for i = #self.subShapes, 1, -1 do
         local subShape = self.subShapes[i]
 
+        local remove = false
+
+        -- remove condition: row being deleted
         if inTable(rows, subShape.row) then
+            remove = true
+        end
+
+        -- remove condition: too small for box2d
+        if not largeenough(subShape.shape) then
+            remove = true
+        end
+
+        if remove then
             table.remove(self.subShapes, i)
         end
     end
 
     if #self.subShapes > 0 then
         for _, subShape in ipairs(self.subShapes) do
-            if largeenough(subShape.shape) then
-                -- limit vertices to 8 TODO: bad?
-                for i = #subShape.shape, 17, -1 do
-                    subShape.shape[i] = nil
-                end
-
-                self.fixture:destroy()
-                self.shape = love.physics.newPolygonShape(subShape.shape)
-                self.fixture = love.physics.newFixture(self.piece.body, self.shape)
-                self.fixture:setFriction(PIECEFRICTION)
+            -- limit vertices to 8 TODO: bad?
+            for i = #subShape.shape, 17, -1 do
+                subShape.shape[i] = nil
             end
+
+            self.fixture:destroy()
+            self.shape = love.physics.newPolygonShape(subShape.shape)
+            self.fixture = love.physics.newFixture(self.piece.body, self.shape)
+            self.fixture:setFriction(PIECEFRICTION)
         end
     else
         self.fixture:destroy()

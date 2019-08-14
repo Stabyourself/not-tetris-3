@@ -39,7 +39,6 @@ function Playfield:update(dt)
 
     while self.worldUpdateBuffer >= WORLDUPDATEINTERVAL do
         if self.spawnNewPieceNextFrame then
-            self:clearRow({19})
             self:nextPiece()
             self.spawnNewPieceNextFrame = false
         end
@@ -52,6 +51,9 @@ function Playfield:update(dt)
         self.worldUpdateBuffer = self.worldUpdateBuffer - WORLDUPDATEINTERVAL
 
         self:updateLines()
+        if self.spawnNewPieceNextFrame then
+            self:clearRow({19})
+        end
     end
 
     for _, piece in ipairs(self.pieces) do
@@ -82,7 +84,7 @@ function Playfield:draw()
 end
 
 function Playfield:worldToRow(y)
-    return math.ceil(y/PHYSICSSCALE)
+    return math.floor(y/PHYSICSSCALE)+1
 end
 
 function Playfield:rowToWorld(y)
