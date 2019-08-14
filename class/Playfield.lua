@@ -82,7 +82,7 @@ function Playfield:draw()
 end
 
 function Playfield:worldToRow(y)
-    return math.floor(y/PHYSICSSCALE)+1
+    return math.ceil(y/PHYSICSSCALE)
 end
 
 function Playfield:rowToWorld(y)

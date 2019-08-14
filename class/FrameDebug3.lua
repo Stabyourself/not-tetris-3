@@ -8,7 +8,8 @@ local playing = true
 local advanceFrame = false
 
 FFKEYS = {
-    {key="-", val=0.1}
+    {key="-", val=0.1},
+    {key=".", val=0.001},
 }
 
 function FrameDebug3.update(dt)

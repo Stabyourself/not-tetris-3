@@ -74,10 +74,18 @@ function Block:debugDraw()
             love.graphics.print(t, subShape.shape[1], subShape.shape[2])
         end
     end
+
+    if DEBUG_DRAWSUBSHAPEROW then
+        for _, subShape in ipairs(self.subShapes) do
+            love.graphics.print(subShape.row, subShape.shape[1], subShape.shape[2])
+        end
+    end
 end
 
 function Block:cut(rows)
-    for _, subShape in ipairs(self.subShapes) do
+    for i = #self.subShapes, 1, -1 do
+        local subShape = self.subShapes[i]
+
         if inTable(rows, subShape.row) then
             table.remove(self.subShapes, i)
         end
