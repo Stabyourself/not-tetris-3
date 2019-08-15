@@ -85,7 +85,6 @@ end
 function Block:cut(rows)
     for i = #self.subShapes, 1, -1 do
         local subShape = self.subShapes[i]
-
         local remove = false
 
         -- remove condition: row being deleted
@@ -117,7 +116,7 @@ function Block:cut(rows)
         end
     else
         self.fixture:destroy()
-        self.piece:removeBlock(self)
+        self.removeMe = true
     end
 end
 

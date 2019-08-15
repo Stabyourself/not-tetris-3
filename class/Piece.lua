@@ -86,18 +86,17 @@ function Piece:rotate(dir)
 end
 
 function Piece:removeBlock(removeBlock)
-    for i = #self.blocks, 1, -1 do
-        local block = self.blocks[i]
-
-        if block == removeBlock then
-            table.remove(self.blocks, i)
-        end
-    end
 end
 
 function Piece:cut(rows)
     for _, block in ipairs(self.blocks) do
         block:cut(rows)
+    end
+
+    for i = #self.blocks, 1, -1 do
+        if self.blocks[i].removeMe then
+            table.remove(self.blocks, i)
+        end
     end
 end
 

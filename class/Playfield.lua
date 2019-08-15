@@ -40,6 +40,7 @@ function Playfield:update(dt)
     while self.worldUpdateBuffer >= WORLDUPDATEINTERVAL do
         if self.spawnNewPieceNextFrame then
             self:nextPiece()
+            -- self.activePiece = false
             self.spawnNewPieceNextFrame = false
         end
 
