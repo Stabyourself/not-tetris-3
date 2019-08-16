@@ -21,7 +21,7 @@ function Piece:initialize(playfield, pieceType)
 
                 local shape = love.physics.newRectangleShape((rx+.5)*PHYSICSSCALE, (ry+.5)*PHYSICSSCALE, PHYSICSSCALE, PHYSICSSCALE)
 
-                local block = Block:new(self, shape, self.pieceType.map[x][y])
+                local block = Block:new(self, shape, rx, ry, self.pieceType.map[x][y])
                 table.insert(self.blocks, block)
             end
         end
@@ -92,9 +92,6 @@ function Piece:rotate(dir)
     self.body:applyTorque(ROTATEFORCE*dir, 0)
 end
 
-function Piece:removeBlock(removeBlock)
-end
-
 function Piece:cut(rows)
     for i = #self.blocks, 1, -1 do
         self.blocks[i]:cut(rows)
@@ -105,6 +102,8 @@ function Piece:cut(rows)
             table.remove(self.blocks, i)
         end
     end
+
+    -- check if blocks are separated
 end
 
 return Piece

@@ -2,9 +2,11 @@ local Block = class("Block")
 
 local img = love.graphics.newImage("img/tiles/0.png")
 
-function Block:initialize(piece, shape, quad)
+function Block:initialize(piece, shape, x, y, quad)
     self.piece = piece
     self.shape = shape
+    self.x = x
+    self.y = y
     self.quad = quad
 
     self.fixture = love.physics.newFixture(self.piece.body, self.shape)
@@ -17,9 +19,24 @@ function Block:update(dt)
 
 end
 
+local shape
+local function blockStencil()
+    love.graphics.polygon("fill", shape:getPoints())
+end
+
 function Block:draw()
+    love.graphics.push()
     if not DEBUG_HIDEBLOCKS then
-        love.graphics.draw(img, self.quad, self.x*PHYSICSSCALE, self.y*PHYSICSSCALE, 0, PHYSICSSCALE/PIECESCALE)
+        shape = self.shape
+        love.graphics.stencil(blockStencil, "replace", 1)
+        love.graphics.setStencilTest("greater", 0)
+
+        love.graphics.translate(self.x*PHYSICSSCALE, self.y*PHYSICSSCALE)
+
+        love.graphics.draw(img, self.quad, 0, 0, 0, PHYSICSSCALE/PIECESCALE)
+
+        love.graphics.setStencilTest()
+        love.graphics.pop()
     end
 
     self:debugDraw()
@@ -43,7 +60,7 @@ function Block:debugDraw()
     if DEBUG_DRAWSHAPES then
         love.graphics.setColor(0, 0, 1)
 
-        drawLinedPolygon({self.fixture:getShape():getPoints()})
+        drawLinedPolygon({self.shape:getPoints()})
 
         love.graphics.setColor(1, 1, 1)
     end
@@ -101,7 +118,7 @@ function Block:cut(rows)
 
         for i = #shapes, 2, -1 do
             local shape = love.physics.newPolygonShape(shapes[i])
-            table.insert(self.piece.blocks, Block:new(self.piece, shape, self.quad))
+            table.insert(self.piece.blocks, Block:new(self.piece, shape, self.x, self.y, self.quad))
         end
 
         self.fixture:destroy()
