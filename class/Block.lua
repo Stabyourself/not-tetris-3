@@ -40,6 +40,8 @@ function Block:draw()
     self:debugDraw()
 end
 
+bla = {}
+
 function Block:debugDraw()
     if DEBUG_DRAWSUBSHAPES then
         for _, subShape in ipairs(self.subShapes) do
@@ -49,20 +51,14 @@ function Block:debugDraw()
                 love.graphics.setColor(0, 1, 0)
             end
 
-            for i = 1, #subShape.shape-2, 2 do
-                love.graphics.line(subShape.shape[i], subShape.shape[i+1], subShape.shape[i+2], subShape.shape[i+3])
-            end
-            love.graphics.line(subShape.shape[#subShape.shape-1], subShape.shape[#subShape.shape], subShape.shape[1], subShape.shape[2])
+            drawLinedPolygon(subShape.shape)
         end
     end
 
     if DEBUG_DRAWSHAPES then
         love.graphics.setColor(0, 0, 1)
-        local points = {self.fixture:getShape():getPoints()}
-        for i = 1, #points-2, 2 do
-            love.graphics.line(points[i], points[i+1], points[i+2], points[i+3])
-        end
-        love.graphics.line(points[#points-1], points[#points], points[1], points[2])
+
+        drawLinedPolygon({self.fixture:getShape():getPoints()})
 
         love.graphics.setColor(1, 1, 1)
     end
@@ -126,16 +122,21 @@ function Block:setSubShapes()
 
     -- Get top and bottom most row that this block is in
     local topRow = math.huge
-    local bottomRow = -1
+    local bottomRow = -math.huge
+
+    local topY = math.huge
+    local bottomY = -math.huge
+
     local points = {self.piece.body:getWorldPoints(self.shape:getPoints())}
 
     for i = 1, #points, 2 do
         local x, y = points[i], points[i+1]
 
-        -- print
-
         topRow = math.min(topRow, math.floor(y/PHYSICSSCALE)+1)
         bottomRow = math.max(bottomRow, math.ceil(y/PHYSICSSCALE))
+
+        topY = math.min(topY, y)
+        bottomY = math.max(bottomY, y)
     end
 
     -- raytrace the points at which this block crosses lines
@@ -145,13 +146,16 @@ function Block:setSubShapes()
         -- FROM LEFT
         local x1 = 0
         local x2 = self.piece.playfield.columns*PHYSICSSCALE
-        local y1 = self.piece.playfield:rowToWorld(row)
-        local y2 = self.piece.playfield:rowToWorld(row)
+        local y = self.piece.playfield:rowToWorld(row)
 
-        local xn, yn, fraction = self.fixture:rayCast(x1, y1, x2, y2, 1)
+        local xn, yn, fraction = self.fixture:rayCast(x1, y, x2, y, 1)
 
-        local hitx = x1 + (x2 - x1) * fraction
-        -- local hity = y1 + (y2 - y1) * fraction -- we already have hity
+        if not fraction then -- crash
+            print(x1, y, x2, y, 1)
+            print_r(points)
+        end
+
+        local hitx = x1 + x2 * fraction --todo: simplify because of known x1/x2 0
 
         rayTraceResults.left[row] = hitx
 
@@ -159,10 +163,9 @@ function Block:setSubShapes()
         local x1 = self.piece.playfield.columns*PHYSICSSCALE
         local x2 = 0
 
-        local xn, yn, fraction = self.fixture:rayCast(x1, y1, x2, y2, 1)
+        local xn, yn, fraction = self.fixture:rayCast(x1, y, x2, y, 1)
 
-        local hitx = x1 + (x2 - x1) * fraction
-        -- local hity = y1 + (y2 - y1) * fraction
+        local hitx = x1  - x1 * fraction
 
         rayTraceResults.right[row] = hitx
     end
@@ -171,7 +174,17 @@ function Block:setSubShapes()
     local previousRow = false
 
     local function doPoint(x, y, add)
-        local row = self.piece.playfield:worldToRow(y)
+        local row
+
+        if y == bottomY then -- edgy case
+            row = math.ceil(y/PHYSICSSCALE)
+            if y%PHYSICSSCALE == 0 then
+                print("woahaah")
+            end
+        else
+            row = self.piece.playfield:worldToRow(y)
+        end
+
 
         if not subShapes[row] then
             subShapes[row] = {}
@@ -222,7 +235,7 @@ function Block:setSubShapes()
 
     for row, subShape in pairs(subShapes) do
         -- make local
-        for i = 1, #subShape-1, 2 do
+        for i = 1, #subShape, 2 do
             subShape[i], subShape[i+1] = self.piece.body:getLocalPoint(subShape[i], subShape[i+1])
         end
 

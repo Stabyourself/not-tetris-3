@@ -44,6 +44,8 @@ function Piece:draw()
         block:draw()
     end
 
+    love.graphics.setColor(1, 1, 1)
+
     love.graphics.pop()
 end
 

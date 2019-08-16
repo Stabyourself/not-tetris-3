@@ -31,8 +31,6 @@ function Playfield:initialize(x, y, columns, rows)
     self:updateLines()
 end
 
-local bla = false
-
 function Playfield:update(dt)
     -- world is updated in fixed steps to prevent fps-dependency (box2d behaves differently with different deltas, even if the total is the same)
     self.worldUpdateBuffer = self.worldUpdateBuffer + dt

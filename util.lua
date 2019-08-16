@@ -167,3 +167,10 @@ function largeenough(coords) --checks if a polygon is good enough for box2d's sn
 	return true
 
 end
+
+function drawLinedPolygon(points)
+	for i = 1, #points-2, 2 do
+		love.graphics.line(points[i], points[i+1], points[i+2], points[i+3])
+	end
+	love.graphics.line(points[#points-1], points[#points], points[1], points[2])
+end
