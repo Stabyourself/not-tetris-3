@@ -99,14 +99,22 @@ function Block:cut(rows)
     end
 
     if #self.subShapes > 0 then
+        local shapes = {}
+
         for _, subShape in ipairs(self.subShapes) do
+            table.insert(shapes, {unpack(subShape.shape)})
+        end
+
+        shapes = combineShapes(shapes)
+
+        for _, shape in ipairs(shapes) do
             -- limit vertices to 8 TODO: bad?
-            for i = #subShape.shape, 17, -1 do
-                subShape.shape[i] = nil
+            for i = #shape, 17, -1 do
+                shape[i] = nil
             end
 
             self.fixture:destroy()
-            self.shape = love.physics.newPolygonShape(subShape.shape)
+            self.shape = love.physics.newPolygonShape(shape)
             self.fixture = love.physics.newFixture(self.piece.body, self.shape)
             self.fixture:setFriction(PIECEFRICTION)
         end
@@ -150,12 +158,7 @@ function Block:setSubShapes()
 
         local xn, yn, fraction = self.fixture:rayCast(x1, y, x2, y, 1)
 
-        if not fraction then -- crash
-            print(x1, y, x2, y, 1)
-            print_r(points)
-        end
-
-        local hitx = x1 + x2 * fraction --todo: simplify because of known x1/x2 0
+        local hitx = x2 * fraction
 
         rayTraceResults.left[row] = hitx
 
@@ -165,7 +168,7 @@ function Block:setSubShapes()
 
         local xn, yn, fraction = self.fixture:rayCast(x1, y, x2, y, 1)
 
-        local hitx = x1  - x1 * fraction
+        local hitx = x1 * (1-fraction)
 
         rayTraceResults.right[row] = hitx
     end
@@ -176,11 +179,8 @@ function Block:setSubShapes()
     local function doPoint(x, y, add)
         local row
 
-        if y == bottomY then -- edgy case
+        if y == bottomY then -- prioritize above row for the bottom-most points
             row = math.ceil(y/PHYSICSSCALE)
-            if y%PHYSICSSCALE == 0 then
-                print("woahaah")
-            end
         else
             row = self.piece.playfield:worldToRow(y)
         end

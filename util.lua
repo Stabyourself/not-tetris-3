@@ -174,3 +174,75 @@ function drawLinedPolygon(points)
 	end
 	love.graphics.line(points[#points-1], points[#points], points[1], points[2])
 end
+
+function findPointInShapes(shapes, x, y, notShape)
+	for i = 1, #shapes do
+		if i ~= notShape then
+			local shape = shapes[i]
+
+			for j = 1, #shape, 2 do
+				local sx = shape[j]
+				local sy = shape[j+1]
+
+				if x == sx and y == sy then
+					return i, j
+				end
+			end
+		end
+	end
+
+	return false
+end
+
+function combineShapes(shapes)
+	local newShapes = {}
+
+
+	while #shapes > 0 do
+		local newShape = {}
+		local pointsToGo = shapes[1]
+
+		while #pointsToGo > 0 do
+			local x = pointsToGo[1]
+			local y = pointsToGo[2]
+
+			local foundShapeIndex, foundPointIndex = findPointInShapes(shapes, x, y, 1)
+
+			if foundShapeIndex then --Point exists in another shape
+				-- insert points into pointsToGo
+				for i = foundPointIndex+2, #shapes[foundShapeIndex], 2 do
+					local x = shapes[foundShapeIndex][i]
+					local y = shapes[foundShapeIndex][i+1]
+
+					table.insert(pointsToGo, x)
+					table.insert(pointsToGo, y)
+				end
+
+				for i = 1, foundPointIndex-2, 2 do
+					local x = shapes[foundShapeIndex][i]
+					local y = shapes[foundShapeIndex][i+1]
+
+					table.insert(pointsToGo, x)
+					table.insert(pointsToGo, y)
+				end
+
+				table.remove(shapes, foundShapeIndex)
+			else
+				-- insert point into new shape
+				table.insert(newShape, x)
+				table.insert(newShape, y)
+			end
+
+			-- remove point from "to be processed"
+			table.remove(pointsToGo, 1)
+			table.remove(pointsToGo, 1)
+		end
+
+		-- next shape
+		table.remove(shapes, 1)
+		table.insert(newShapes, newShape)
+		newShape = {}
+	end
+
+	return newShapes
+end

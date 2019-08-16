@@ -38,7 +38,6 @@ function Playfield:update(dt)
     while self.worldUpdateBuffer >= WORLDUPDATEINTERVAL do
         if self.spawnNewPieceNextFrame then
             self:nextPiece()
-            -- self.activePiece = false
             self.spawnNewPieceNextFrame = false
         end
 
@@ -51,7 +50,7 @@ function Playfield:update(dt)
 
         self:updateLines()
         if self.spawnNewPieceNextFrame then
-            self:clearRow({19})
+            self:clearRow({18, 19})
         end
     end
 
