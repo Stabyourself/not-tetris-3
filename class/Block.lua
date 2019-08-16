@@ -2,30 +2,15 @@ local Block = class("Block")
 
 local img = love.graphics.newImage("img/tiles/0.png")
 
-function Block:initialize(piece, x, y, quad)
+function Block:initialize(piece, shape, quad)
     self.piece = piece
-    self.x = x
-    self.y = y
+    self.shape = shape
     self.quad = quad
-
-    if DIAMONDADD > 0 then
-        error("DIAMONDADD support broke lol.")
-        self.shape = love.physics.newPolygonShape(
-            x+DIAMONDADD, y, -- clockwise, starting top leftish
-            x+1-DIAMONDADD, y,
-            x+1, y+DIAMONDADD,
-            x+1, y+1-DIAMONDADD,
-            x+1-DIAMONDADD, y+1,
-            x+DIAMONDADD, y+1,
-            x, y+1-DIAMONDADD,
-            x, y+DIAMONDADD
-        )
-    else
-        self.shape = love.physics.newRectangleShape((x+.5)*PHYSICSSCALE, (y+.5)*PHYSICSSCALE, PHYSICSSCALE, PHYSICSSCALE)
-    end
 
     self.fixture = love.physics.newFixture(self.piece.body, self.shape)
     self.fixture:setFriction(PIECEFRICTION)
+
+    self:setSubShapes()
 end
 
 function Block:update(dt)
@@ -107,17 +92,22 @@ function Block:cut(rows)
 
         shapes = combineShapes(shapes)
 
-        for _, shape in ipairs(shapes) do
+        for i = 1, #shapes do
             -- limit vertices to 8 TODO: bad?
-            for i = #shape, 17, -1 do
-                shape[i] = nil
+            for j = #shapes[i], 17, -1 do
+                shapes[i][j] = nil
             end
-
-            self.fixture:destroy()
-            self.shape = love.physics.newPolygonShape(shape)
-            self.fixture = love.physics.newFixture(self.piece.body, self.shape)
-            self.fixture:setFriction(PIECEFRICTION)
         end
+
+        for i = #shapes, 2, -1 do
+            local shape = love.physics.newPolygonShape(shapes[i])
+            table.insert(self.piece.blocks, Block:new(self.piece, shape, self.quad))
+        end
+
+        self.fixture:destroy()
+        self.shape = love.physics.newPolygonShape(shapes[1])
+        self.fixture = love.physics.newFixture(self.piece.body, self.shape)
+        self.fixture:setFriction(PIECEFRICTION)
     else
         self.fixture:destroy()
         self.removeMe = true

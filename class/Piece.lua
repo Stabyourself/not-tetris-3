@@ -16,7 +16,12 @@ function Piece:initialize(playfield, pieceType)
     for x = 1, #self.pieceType.map do
         for y = 1, #self.pieceType.map[x] do
             if self.pieceType.map[x][y] then
-                local block = Block:new(self, x-1-#self.pieceType.map/2, y-1-#self.pieceType.map[x]/2, self.pieceType.map[x][y])
+                local rx = x-1-#self.pieceType.map/2
+                local ry = y-1-#self.pieceType.map[x]/2
+
+                local shape = love.physics.newRectangleShape((rx+.5)*PHYSICSSCALE, (ry+.5)*PHYSICSSCALE, PHYSICSSCALE, PHYSICSSCALE)
+
+                local block = Block:new(self, shape, self.pieceType.map[x][y])
                 table.insert(self.blocks, block)
             end
         end
@@ -91,8 +96,8 @@ function Piece:removeBlock(removeBlock)
 end
 
 function Piece:cut(rows)
-    for _, block in ipairs(self.blocks) do
-        block:cut(rows)
+    for i = #self.blocks, 1, -1 do
+        self.blocks[i]:cut(rows)
     end
 
     for i = #self.blocks, 1, -1 do

@@ -28,7 +28,6 @@ function Playfield:initialize(x, y, columns, rows)
 
     self.pieces = {}
     self:nextPiece()
-    self:updateLines()
 end
 
 function Playfield:update(dt)
@@ -50,7 +49,7 @@ function Playfield:update(dt)
 
         self:updateLines()
         if self.spawnNewPieceNextFrame then
-            self:clearRow({18, 19})
+            self:clearRow({19})
         end
     end
 
