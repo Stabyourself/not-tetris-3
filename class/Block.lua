@@ -89,12 +89,18 @@ end
 
 function Block:cut(rows)
     -- remove condition: row being deleted
+    local removed = false
     for i = #self.subShapes, 1, -1 do
         local subShape = self.subShapes[i]
 
         if inTable(rows, subShape.row) then
             table.remove(self.subShapes, i)
+            removed = true
         end
+    end
+
+    if not removed then -- no need to do anything if no subshapes were removed in the cutting
+        return
     end
 
     local shapes = {}

@@ -99,7 +99,7 @@ function Playfield:updateLines()
 end
 
 function Playfield:nextPiece()
-    local pieceNum = 1--love.math.random(1, #pieceTypes)
+    local pieceNum = love.math.random(1, #pieceTypes)
     local piece = Piece:new(self, pieceTypes[pieceNum])
 
     self.activePiece = piece
