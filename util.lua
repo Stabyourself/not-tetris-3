@@ -175,6 +175,10 @@ function drawLinedPolygon(points)
 	love.graphics.line(points[#points-1], points[#points], points[1], points[2])
 end
 
+function floatEqual(a, b)
+	return math.abs(a-b)<0.000000001
+end
+
 function findPointInShapes(shapes, x, y, notShape)
 	for i = 1, #shapes do
 		if i ~= notShape then
@@ -184,7 +188,7 @@ function findPointInShapes(shapes, x, y, notShape)
 				local sx = shape[j]
 				local sy = shape[j+1]
 
-				if x == sx and y == sy then
+				if floatEqual(x, sx) and floatEqual(y, sy) then
 					return i, j
 				end
 			end
