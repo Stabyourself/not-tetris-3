@@ -176,7 +176,7 @@ function drawLinedPolygon(points)
 end
 
 function floatEqual(a, b)
-	return math.abs(a-b)<0.000000001
+	return a==b
 end
 
 function findPointInShapes(shapes, x, y, notShape)
@@ -200,52 +200,50 @@ end
 
 function combineShapes(shapes)
 	local newShapes = {}
+	local newShape = {}
 
+	for i, shape in ipairs(shapes) do
+		if not shape.traversed then
+			-- find first point that isn't shared
+			local shapeI = i
 
-	while #shapes > 0 do
-		local newShape = {}
-		local pointsToGo = shapes[1]
+			local firstPointI = 1
+			local firstShapeI = shapeI
 
-		while #pointsToGo > 0 do
-			local x = pointsToGo[1]
-			local y = pointsToGo[2]
-
-			local foundShapeIndex, foundPointIndex = findPointInShapes(shapes, x, y, 1)
-
-			if foundShapeIndex then --Point exists in another shape
-				-- insert points into pointsToGo
-				for i = foundPointIndex+2, #shapes[foundShapeIndex], 2 do
-					local x = shapes[foundShapeIndex][i]
-					local y = shapes[foundShapeIndex][i+1]
-
-					table.insert(pointsToGo, x)
-					table.insert(pointsToGo, y)
-				end
-
-				for i = 1, foundPointIndex-2, 2 do
-					local x = shapes[foundShapeIndex][i]
-					local y = shapes[foundShapeIndex][i+1]
-
-					table.insert(pointsToGo, x)
-					table.insert(pointsToGo, y)
-				end
-
-				table.remove(shapes, foundShapeIndex)
-			else
-				-- insert point into new shape
-				table.insert(newShape, x)
-				table.insert(newShape, y)
+			while findPointInShapes(shapes, shape[firstPointI], shape[firstPointI+1], shapeI) do
+				firstPointI = firstPointI+2
 			end
+			local pointI = firstPointI
 
-			-- remove point from "to be processed"
-			table.remove(pointsToGo, 1)
-			table.remove(pointsToGo, 1)
+
+			repeat -- loop through points until we made a neat circle
+				pointI = pointI + 2
+
+				if pointI > #shapes[shapeI] then --loop points
+					pointI = 1
+				end
+
+				local foundShapeI, foundPointI = findPointInShapes(shapes, shapes[shapeI][pointI], shapes[shapeI][pointI+1], shapeI)
+
+				if foundShapeI then -- traversal point
+					shapeI = foundShapeI
+					pointI = foundPointI+2
+
+					if pointI > #shapes[shapeI] then --loop points
+						pointI = 1
+					end
+
+					shapes[shapeI].traversed = true
+				end
+
+				table.insert(newShape, shapes[shapeI][pointI])
+				table.insert(newShape, shapes[shapeI][pointI+1])
+
+			until shapeI == firstShapeI and pointI == firstPointI
+
+			table.insert(newShapes, newShape)
+			newShape = {}
 		end
-
-		-- next shape
-		table.remove(shapes, 1)
-		table.insert(newShapes, newShape)
-		newShape = {}
 	end
 
 	return newShapes

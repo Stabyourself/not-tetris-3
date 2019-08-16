@@ -2,7 +2,7 @@
 
 local FrameDebug3 = {}
 
-local advanceDT = 1/60
+local advanceDT = 1/144
 
 local playing = true
 local advanceFrame = false

@@ -78,41 +78,67 @@ function Block:debugDraw()
             love.graphics.print(subShape.row, subShape.shape[1], subShape.shape[2])
         end
     end
+
+    if DEBUG_DRAWSHAPEVERTICES then
+        love.graphics.setColor(1, 0, 0)
+        local points = {self.shape:getPoints()}
+        love.graphics.print(#points/2, points[1], points[2])
+        love.graphics.setColor(1, 1, 1)
+    end
 end
 
 function Block:cut(rows)
+    -- remove condition: row being deleted
     for i = #self.subShapes, 1, -1 do
         local subShape = self.subShapes[i]
-        local remove = false
 
-        -- remove condition: row being deleted
         if inTable(rows, subShape.row) then
-            remove = true
-        end
-
-        -- remove condition: too small for box2d
-        if not largeenough(subShape.shape) then
-            remove = true
-        end
-
-        if remove then
             table.remove(self.subShapes, i)
         end
     end
 
-    if #self.subShapes > 0 then
-        local shapes = {}
+    local shapes = {}
+    for _, subShape in ipairs(self.subShapes) do
+        table.insert(shapes, {unpack(subShape.shape)})
+    end
 
-        for _, subShape in ipairs(self.subShapes) do
-            table.insert(shapes, {unpack(subShape.shape)})
-        end
-
+    if #shapes > 0 then
         shapes = combineShapes(shapes)
 
+        -- remove condition: too small for box2d
+        for i = #shapes, 1, -1 do
+            local shape = shapes[i]
+
+            if not largeenough(shape) then
+                table.remove(shapes, i)
+            end
+        end
+    end
+
+    if #shapes > 0 then
         for i = 1, #shapes do
             -- limit vertices to 8 TODO: bad?
-            for j = #shapes[i], 17, -1 do
-                shapes[i][j] = nil
+            while #shapes[i] > 16 do
+                local shortest = math.huge
+                local shortestI
+
+                for pointI = 1, #shapes[i], 2 do
+                    local compareI = pointI+2
+
+                    if compareI > #shapes[i] then
+                        compareI = 1
+                    end
+
+                    local dist = math.sqrt((shapes[i][pointI] - shapes[i][compareI])^2 + (shapes[i][pointI+1] - shapes[i][compareI+1])^2)
+
+                    if dist < shortest then
+                        shortest = dist
+                        shortestI = pointI
+                    end
+                end
+
+                table.remove(shapes[i], shortestI)
+                table.remove(shapes[i], shortestI)
             end
         end
 
