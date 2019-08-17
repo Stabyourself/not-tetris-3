@@ -35,6 +35,10 @@ function love.keypressed(key)
         love.event.quit()
     end
 
+    if key == "," then
+        debug.debug()
+    end
+
     gamestate.keypressed(key)
 end
 

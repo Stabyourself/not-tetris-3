@@ -99,8 +99,8 @@ function Playfield:updateLines()
 end
 
 function Playfield:nextPiece()
-    local pieceNum = love.math.random(1, #pieceTypes)
-    local piece = Piece:new(self, pieceTypes[pieceNum])
+    local pieceNum = 1--love.math.random(1, #pieceTypes)
+    local piece = Piece.fromPieceType(self, pieceTypes[pieceNum])
 
     self.activePiece = piece
 
@@ -141,9 +141,13 @@ function Playfield.postSolve(a, b)
     end
 end
 
+function Playfield:addPiece(piece)
+    table.insert(self.pieces, piece)
+end
+
 function Playfield:clearRow(rows)
-    for _, piece in ipairs(self.pieces) do
-        piece:cut(rows)
+    for i = #self.pieces, 1, -1 do
+        self.pieces[i]:cut(rows)
     end
 end
 

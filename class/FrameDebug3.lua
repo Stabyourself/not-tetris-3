@@ -10,6 +10,7 @@ local advanceFrame = false
 FFKEYS = {
     {key="-", val=0.1},
     {key=".", val=0.001},
+    {key="+", val=10},
 }
 
 function FrameDebug3.update(dt)
