@@ -22,9 +22,10 @@ function Playfield:initialize(x, y, columns, rows)
     self.walls[1].dontDrop = true
     self.walls[2].dontDrop = true
 
-    self.worldUpdateBuffer = 0
+    self.worldUpdateBuffer = WORLDUPDATEINTERVAL
 
     self.rowOverlay = true
+    self.area = {}
 
     self.pieces = {}
     self:nextPiece()
@@ -47,9 +48,10 @@ function Playfield:update(dt)
         self.world:update(WORLDUPDATEINTERVAL)
         self.worldUpdateBuffer = self.worldUpdateBuffer - WORLDUPDATEINTERVAL
 
+        -- print("update!")
         self:updateLines()
         if self.spawnNewPieceNextFrame then
-            self:clearRow({19})
+            -- self:clearRow({19})
         end
     end
 
@@ -66,8 +68,8 @@ function Playfield:draw()
     if self.rowOverlay then
         love.graphics.setColor(1, 1, 1, 0.2)
 
-        for i = 2+math.fmod(self.rows, 1), self.rows, 2 do
-            love.graphics.rectangle("fill", 0, (i-1)*PIECESCALE, self.columns*PIECESCALE, PIECESCALE)
+        for row = 2+math.fmod(self.rows, 1), self.rows, 2 do
+            love.graphics.rectangle("fill", 0, (row-1)*PIECESCALE, self.columns*PIECESCALE, PIECESCALE)
         end
 
         love.graphics.setColor(1, 1, 1)
@@ -75,6 +77,13 @@ function Playfield:draw()
 
     for _, v in ipairs(self.pieces) do
         v:draw()
+    end
+
+    if DEBUG_DRAWLINEAREA then
+        for row = 1, 20 do
+            local factor = self.area[row]/(math.floor(self.columns)*BLOCKSIZE)
+            love.graphics.print(string.format("%.2f", factor*100), 0, (row-1)*PIECESCALE, 0, 0.5, 0.5)
+        end
     end
 
     love.graphics.pop()
@@ -88,7 +97,17 @@ function Playfield:rowToWorld(y)
     return y*PHYSICSSCALE
 end
 
+function Playfield:addArea(row, area)
+    if row > 0 then
+        self.area[row] = self.area[row] + area
+    end
+end
+
 function Playfield:updateLines()
+    for row = 1, self.rows do
+        self.area[row] = 0
+    end
+
     for _, piece in ipairs(self.pieces) do
         -- if piece ~= self.activePiece then -- don't include the active piece?
             for _, block in ipairs(piece.blocks) do
@@ -99,7 +118,7 @@ function Playfield:updateLines()
 end
 
 function Playfield:nextPiece()
-    local pieceNum = 1--love.math.random(1, #pieceTypes)
+    local pieceNum = love.math.random(1, #pieceTypes)
     local piece = Piece.fromPieceType(self, pieceTypes[pieceNum])
 
     self.activePiece = piece
@@ -132,12 +151,13 @@ function Playfield.postSolve(a, b)
 
         -- some velocity check here maybe
 
-        if piece.body:getY() < 0 then
+        if piece.body:getY() < PIECESTARTY+1 then
             self:gameOver()
             return
         end
 
         self.spawnNewPieceNextFrame = true
+        self.activePiece = false
     end
 end
 

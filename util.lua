@@ -54,7 +54,7 @@ function polygonarea(coords) --calculates the area of a polygon
 
 	local area = 0
 
-	for i = 5, #coords - 1, 2 do
+	for i = 5, #coords, 2 do
 		local x = coords[i]
 		local y = coords[i + 1]
 

@@ -11,8 +11,6 @@ function Block:initialize(piece, shape, x, y, quad)
 
     self.fixture = love.physics.newFixture(self.piece.body, self.shape)
     self.fixture:setFriction(PIECEFRICTION)
-
-    self:setSubShapes()
 end
 
 function Block:update(dt)
@@ -41,8 +39,6 @@ function Block:draw()
 
     self:debugDraw()
 end
-
-bla = {}
 
 function Block:debugDraw()
     if DEBUG_DRAWSUBSHAPES then
@@ -277,6 +273,8 @@ function Block:setSubShapes()
         for i = 1, #subShape, 2 do
             subShape[i], subShape[i+1] = self.piece.body:getLocalPoint(subShape[i], subShape[i+1])
         end
+
+        self.piece.playfield:addArea(row, polygonarea(subShape))
 
         table.insert(self.subShapes,
             {
