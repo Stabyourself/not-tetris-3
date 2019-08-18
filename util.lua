@@ -249,3 +249,34 @@ function combineShapes(shapes)
 
 	return newShapes
 end
+
+function iclearTable(t)
+	for i = #t, 1, -1 do
+		t[i] = nil
+	end
+end
+
+function clearTable(t)
+	for i in pairs(t) do
+		t[i] = nil
+	end
+end
+
+function setPointTable(t, x1, y1, x2, y2, x3, y3, x4, y4, x5, y5, x6, y6, x7, y7, x8, y8)
+	t[1] = x1
+	t[2] = y1
+	t[3] = x2
+	t[4] = y2
+	t[5] = x3
+	t[6] = y3
+	t[7] = x4
+	t[8] = y4
+	t[9] = x5
+	t[10] = y5
+	t[11] = x6
+	t[12] = y6
+	t[13] = x7
+	t[14] = y7
+	t[15] = x8
+	t[16] = y8
+end

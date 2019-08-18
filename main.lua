@@ -1,4 +1,7 @@
 function love.load()
+    PROF_CAPTURE = true
+    prof = require "lib.jprof.jprof"
+
     love.graphics.setDefaultFilter("nearest", "nearest")
 
     frameDebug3 = require "class.FrameDebug3"
@@ -19,25 +22,36 @@ function love.load()
 end
 
 function love.update(dt)
+    prof.push("frame")
+    prof.push("update")
+
     dt = frameDebug3.update(dt)
 
     gamestate:update(dt)
     Timer.managedUpdate(dt)
+
+    prof.pop("update")
 end
 
 function love.draw()
+    prof.push("draw")
+
     love.graphics.push()
     love.graphics.scale(SCALE, SCALE)
 
     gamestate:draw()
 
     love.graphics.pop()
+
+	prof.pop("draw")
+
+	prof.pop("frame")
 end
 
 function love.keypressed(key)
-    if key == "escape" then
-        love.event.quit()
-    end
+	if key == "escape" then
+		love.event.quit()
+	end
 
     if key == "," then
         debug.debug()
@@ -46,9 +60,6 @@ function love.keypressed(key)
     gamestate:keypressed(key)
 end
 
-function normalizeAngle(a)
-	a = math.fmod(a+math.pi, math.pi*2)-math.pi
-    a = math.fmod(a-math.pi, math.pi*2)+math.pi
-
-    return a
+function love.quit()
+    prof.write("lastrun.mpack")
 end

@@ -30,6 +30,7 @@ function Playfield:initialize(game, x, y, columns, rows)
     self.walls[2].dontDrop = true
 
     self.worldUpdateBuffer = WORLDUPDATEINTERVAL
+    self.linesUpdateBuffer = LINESUPDATEINTERVAL
 
     self.rowOverlay = true
     self.area = {}
@@ -49,6 +50,8 @@ function Playfield:update(dt)
 
     if not self.paused then
         self.worldUpdateBuffer = self.worldUpdateBuffer + dt
+        self.linesUpdateBuffer = self.linesUpdateBuffer + dt
+
         while self.worldUpdateBuffer >= WORLDUPDATEINTERVAL do
             if self.spawnNewPieceNextFrame then
                 -- check if we have garbage to spawn
@@ -67,7 +70,10 @@ function Playfield:update(dt)
                 self.pieceEnded = false
             end
 
-            self:updateLines()
+            if self.linesUpdateBuffer > LINESUPDATEINTERVAL then
+                self:updateLines()
+                self.linesUpdateBuffer = self.linesUpdateBuffer - LINESUPDATEINTERVAL
+            end
 
             self.worldUpdateBuffer = self.worldUpdateBuffer - WORLDUPDATEINTERVAL
         end
@@ -75,9 +81,19 @@ function Playfield:update(dt)
 end
 
 function Playfield:draw()
-    love.graphics.setScissor(self.x*SCALE, self.y*SCALE, self.columns*PIECESCALE*SCALE, self.rows*PIECESCALE*SCALE)
     love.graphics.push()
     love.graphics.translate(self.x, self.y)
+
+
+    -- fullness
+    for row = 1, self.rows do
+        local x = self.areaIndicatorsX
+        local y = self.areaIndicatorsY + (row-1)*PIECESCALE
+
+        local factor = self.area[row]/(math.floor(self.columns)*BLOCKSIZE)
+
+        love.graphics.rectangle("fill", x, y, factor*self.areaIndicatorsWidth, PIECESCALE)
+    end
 
     -- overlay
     if self.rowOverlay then
@@ -90,9 +106,13 @@ function Playfield:draw()
         love.graphics.setColor(1, 1, 1)
     end
 
+    love.graphics.setScissor(self.x*SCALE, self.y*SCALE, self.columns*PIECESCALE*SCALE, self.rows*PIECESCALE*SCALE)
+
+    prof.push("pieces")
     for _, v in ipairs(self.pieces) do
         v:draw()
     end
+    prof.pop("pieces")
 
     -- line clear animation
     for _, clearAnimation in ipairs(self.clearAnimations) do
@@ -100,7 +120,7 @@ function Playfield:draw()
     end
 
     if DEBUG_DRAWLINEAREA then
-        for row = 1, 20 do
+        for row = 1, self.rows do
             local factor = self.area[row]/(math.floor(self.columns)*BLOCKSIZE)
             love.graphics.print(string.format("%.2f", factor*100), 0, (row-1)*PIECESCALE, 0, 0.5)
         end
@@ -129,6 +149,7 @@ function Playfield:addArea(row, area)
 end
 
 function Playfield:updateLines()
+    prof.push("updateLines")
     for row = 1, self.rows do
         self.area[row] = 0
     end
@@ -140,6 +161,7 @@ function Playfield:updateLines()
             end
         end
     end
+    prof.pop("updateLines")
 end
 
 function Playfield:nextPiece()
@@ -227,18 +249,23 @@ function Playfield:checkGarbageSpawn()
     end
 end
 
+local garbageShapes = {}
+for i = 0, 2 do
+    garbageShapes[i+1] = {
+        shape=GARBAGESHAPE.shape,
+        x=GARBAGESHAPE.x,
+        y=GARBAGESHAPE.y,
+        quad = love.graphics.newQuad(i*10+1, 1, 8, 8, 30, 10)
+    }
+end
+
 function Playfield:spawnGarbage(count)
     for y = 1, count do
         for i = 1, GARBAGECOUNT do
             local px = love.math.random()*((self.columns-1)*PHYSICSSCALE)+PHYSICSSCALE/2
             local py = -y*PHYSICSSCALE*1.5
 
-            local piece = Piece.fromShapes(self, {{
-                shape=GARBAGESHAPE.shape,
-                x=GARBAGESHAPE.x,
-                y=GARBAGESHAPE.y,
-                quad = love.graphics.newQuad(love.math.random(0,2)*10+1, 1, 8, 8, 30, 10)
-            }})
+            local piece = Piece.fromShapes(self, {garbageShapes[love.math.random(#garbageShapes)]})
             self:addPiece(piece)
 
             piece.body:setPosition(px, py)

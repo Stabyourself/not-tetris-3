@@ -18,10 +18,15 @@ function ClearAnimation:draw()
     local hw = self.playfield.columns*0.5*PIECESCALE
     local bw = hw*(factor)
 
-    love.graphics.rectangle("fill", hw-bw, (self.row-1)*PIECESCALE, bw, PIECESCALE) -- left
-    love.graphics.rectangle("fill", hw, (self.row-1)*PIECESCALE, bw, PIECESCALE) -- right
+    local y = (self.row-1)*PIECESCALE
+
+    love.graphics.rectangle("fill", hw-bw, y, bw, PIECESCALE) -- left
+    love.graphics.rectangle("fill", hw, y, bw, PIECESCALE) -- right
 
     love.graphics.setColor(1, 1, 1)
+
+    love.graphics.rectangle("fill", hw-bw-.5, y, 1, PIECESCALE)
+    love.graphics.rectangle("fill", hw+bw-.5, y, 1, PIECESCALE)
 end
 
 return ClearAnimation

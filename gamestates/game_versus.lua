@@ -9,6 +9,14 @@ function Game_versus:initialize()
 
     table.insert(self.playfields, Playfield:new(self, 15, 41, 10.25, 20))
     table.insert(self.playfields, Playfield:new(self, 159, 41, 10.25, 20))
+
+    self.playfields[1].areaIndicatorsX = (self.playfields[1].columns+1)*PIECESCALE
+    self.playfields[1].areaIndicatorsY = 0
+    self.playfields[1].areaIndicatorsWidth = -8
+
+    self.playfields[2].areaIndicatorsX = -PIECESCALE
+    self.playfields[2].areaIndicatorsY = 0
+    self.playfields[2].areaIndicatorsWidth = 8
 end
 
 function Game_versus:draw()

@@ -11,6 +11,11 @@ function Block:initialize(piece, shape, x, y, quad)
 
     self.fixture = love.physics.newFixture(self.piece.body, self.shape)
     self.fixture:setFriction(PIECEFRICTION)
+    self.subShapes = {}
+
+    for row = 1, self.piece.playfield.rows do
+        self.subShapes[row] = {}
+    end
 end
 
 local shape
@@ -38,6 +43,7 @@ end
 
 function Block:debugDraw()
     if DEBUG_DRAWSUBSHAPES then
+        error("this is broken, subShapes changed")
         for _, subShape in ipairs(self.subShapes) do
             if subShape.row%2 == 1 then
                 love.graphics.setColor(1, 0, 0)
@@ -57,15 +63,8 @@ function Block:debugDraw()
         love.graphics.setColor(1, 1, 1)
     end
 
-    if DEBUG_DRAWSUBSHAPEUPDATETIME then
-        for _, subShape in ipairs(self.subShapes) do
-            local t = string.format("%.3f", love.timer.getTime() - subShape.timeUpdated)
-
-            love.graphics.print(t, subShape.shape[1], subShape.shape[2])
-        end
-    end
-
     if DEBUG_DRAWSUBSHAPEROW then
+        error("broken, see above")
         for _, subShape in ipairs(self.subShapes) do
             love.graphics.print(subShape.row, subShape.shape[1], subShape.shape[2])
         end
@@ -82,11 +81,10 @@ end
 function Block:cut(rows)
     -- remove condition: row being deleted
     local removed = false
-    for i = #self.subShapes, 1, -1 do
-        local subShape = self.subShapes[i]
 
-        if inTable(rows, subShape.row) then
-            table.remove(self.subShapes, i)
+    for _, row in ipairs(rows) do
+        if #self.subShapes[row] > 0 then
+            iclearTable(self.subShapes[row])
             removed = true
         end
     end
@@ -96,8 +94,11 @@ function Block:cut(rows)
     end
 
     local shapes = {}
-    for _, subShape in ipairs(self.subShapes) do
-        table.insert(shapes, {unpack(subShape.shape)})
+
+    for row, subShape in pairs(self.subShapes) do
+        if #subShape > 0 then
+            table.insert(shapes, subShape)
+        end
     end
 
     if #shapes > 0 then
@@ -155,6 +156,54 @@ function Block:cut(rows)
     end
 end
 
+local rayTraceResults = {left={}, right={}}
+local points = {}
+
+local function doPoint(block, previousRow, x, y, add)
+    local row
+
+    if y == bottomY then -- prioritize above row for the bottom-most points
+        row = math.ceil(y/PHYSICSSCALE)
+    else
+        row = block.piece.playfield:worldToRow(y)
+    end
+
+    if not block.subShapes[row] then
+        block.subShapes[row] = {}
+    end
+
+    if not previousRow then
+        previousRow = row
+    end
+
+    if row > previousRow then -- we just went into the next row
+        -- add exit point to previous row
+        table.insert(block.subShapes[previousRow], rayTraceResults.right[previousRow])
+        table.insert(block.subShapes[previousRow], block.piece.playfield:rowToWorld(previousRow))
+
+        -- add entry point to current row
+        table.insert(block.subShapes[row], rayTraceResults.right[previousRow])
+        table.insert(block.subShapes[row], block.piece.playfield:rowToWorld(previousRow))
+    end
+
+    if row < previousRow then -- we just went into the previous row
+        -- add exit point to previous row
+        table.insert(block.subShapes[previousRow], rayTraceResults.left[row])
+        table.insert(block.subShapes[previousRow], block.piece.playfield:rowToWorld(row))
+
+        -- add entry point to current row
+        table.insert(block.subShapes[row], rayTraceResults.left[row])
+        table.insert(block.subShapes[row], block.piece.playfield:rowToWorld(row))
+    end
+
+    if add then
+        table.insert(block.subShapes[row], x)
+        table.insert(block.subShapes[row], y)
+    end
+
+    return row
+end
+
 function Block:setSubShapes()
     -- doing all of this inline because I expect this to be performance-important code
     -- can be broken up later
@@ -166,7 +215,7 @@ function Block:setSubShapes()
     local topY = math.huge
     local bottomY = -math.huge
 
-    local points = {self.piece.body:getWorldPoints(self.shape:getPoints())}
+    setPointTable(points, self.piece.body:getWorldPoints(self.shape:getPoints()))
 
     for i = 1, #points, 2 do
         local x, y = points[i], points[i+1]
@@ -184,7 +233,8 @@ function Block:setSubShapes()
     end
 
     -- raytrace the points at which this block crosses lines
-    local rayTraceResults = {left={}, right={}}
+    iclearTable(rayTraceResults.left)
+    iclearTable(rayTraceResults.right)
 
     for row = topRow, bottomRow-1 do
         -- FROM LEFT
@@ -197,6 +247,7 @@ function Block:setSubShapes()
         if not fraction then
             print(x1, y, x2, y)
             print(self.fixture:getPoints())
+            print("fraction crash1")
         end
 
         local hitx = x2 * fraction
@@ -212,6 +263,7 @@ function Block:setSubShapes()
         if not fraction then
             print(x1, y, x2, y)
             print(self.fixture:getPoints())
+            print("fraction crash2")
         end
 
         local hitx = x1 * (1-fraction)
@@ -219,81 +271,36 @@ function Block:setSubShapes()
         rayTraceResults.right[row] = hitx
     end
 
-    local subShapes = {}
     local previousRow = false
 
-    local function doPoint(x, y, add)
-        local row
-
-        if y == bottomY then -- prioritize above row for the bottom-most points
-            row = math.ceil(y/PHYSICSSCALE)
-        else
-            row = self.piece.playfield:worldToRow(y)
-        end
-
-
-        if not subShapes[row] then
-            subShapes[row] = {}
-        end
-
-        if not previousRow then
-            previousRow = row
-        end
-
-        if row > previousRow then -- we just went into the next row
-            -- add exit point to previous row
-            table.insert(subShapes[previousRow], rayTraceResults.right[previousRow])
-            table.insert(subShapes[previousRow], self.piece.playfield:rowToWorld(previousRow))
-
-            -- add entry point to current row
-            table.insert(subShapes[row], rayTraceResults.right[previousRow])
-            table.insert(subShapes[row], self.piece.playfield:rowToWorld(previousRow))
-        end
-
-        if row < previousRow then -- we just went into the previous row
-            -- add exit point to previous row
-            table.insert(subShapes[previousRow], rayTraceResults.left[row])
-            table.insert(subShapes[previousRow], self.piece.playfield:rowToWorld(row))
-
-            -- add entry point to current row
-            table.insert(subShapes[row], rayTraceResults.left[row])
-            table.insert(subShapes[row], self.piece.playfield:rowToWorld(row))
-        end
-
-        if add then
-            table.insert(subShapes[row], x)
-            table.insert(subShapes[row], y)
-        end
-
-        previousRow = row
+    for row, subShape in pairs(self.subShapes) do
+        iclearTable(self.subShapes[row])
     end
 
+
+    block = self
+    local previousRow
     for i = 1, #points, 2 do
-        doPoint(points[i], points[i+1], true)
+        previousRow = doPoint(block, previousRow, points[i], points[i+1], true)
     end
 
-    doPoint(points[1], points[2], false) -- go back to first point for the adding of the additional points on the rows
+    doPoint(block, previousRow, points[1], points[2], false) -- go back to first point for the adding of the additional points on the rows
 
     ---------------------------------------------------
     -- all shape calculations complete at this point --
     ---------------------------------------------------
-    self.subShapes = {}
 
-    for row, subShape in pairs(subShapes) do
-        -- make local
-        for i = 1, #subShape, 2 do
-            subShape[i], subShape[i+1] = self.piece.body:getLocalPoint(subShape[i], subShape[i+1])
+    for row, subShape in pairs(self.subShapes) do
+        if row > 0 and row <= self.piece.playfield.rows then -- ignore rows outside the playfield (todo: don't even calculate those?)
+            if #subShape > 0 then -- had stuff entered into it
+                for i = 1, #subShape, 2 do
+                    -- make local
+                    subShape[i], subShape[i+1] = self.piece.body:getLocalPoint(subShape[i], subShape[i+1])
+                end
+
+                self.piece.playfield:addArea(row, polygonarea(subShape))
+            end
         end
-
-        self.piece.playfield:addArea(row, polygonarea(subShape))
-
-        table.insert(self.subShapes,
-            {
-                row=row,
-                shape=subShape,
-                timeUpdated=love.timer.getTime()
-            }
-        )
     end
 end
 

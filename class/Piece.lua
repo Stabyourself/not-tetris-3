@@ -39,10 +39,17 @@ end
 function Piece.fromShapes(playfield, shapes)
     local piece = Piece:new(playfield)
 
-    for _, shape in ipairs(shapes) do
+    if not shapes[1] then
         local b2shape = love.physics.newPolygonShape(shape.shape)
         local block = Block:new(piece, b2shape, shape.x, shape.y, shape.quad)
         table.insert(piece.blocks, block)
+
+    else
+        for _, shape in ipairs(shapes) do
+            local b2shape = love.physics.newPolygonShape(shape.shape)
+            local block = Block:new(piece, b2shape, shape.x, shape.y, shape.quad)
+            table.insert(piece.blocks, block)
+        end
     end
 
     return piece
