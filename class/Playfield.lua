@@ -1,6 +1,5 @@
 local Playfield = class("Playfield")
 
-local game = require "game"
 local Wall = require "class.Wall"
 local pieceTypes = require "class.PieceType"
 local Piece = require "class.Piece"
@@ -24,7 +23,7 @@ function Playfield:initialize(x, y, columns, rows)
 
     self.worldUpdateBuffer = WORLDUPDATEINTERVAL
 
-    self.rowOverlay = true
+    self.rowOverlay = false
     self.area = {}
 
     self.pieces = {}
@@ -51,7 +50,7 @@ function Playfield:update(dt)
         -- print("update!")
         self:updateLines()
         if self.spawnNewPieceNextFrame then
-            -- self:clearRow({19})
+            self:checkClearRow()
         end
     end
 
@@ -82,7 +81,7 @@ function Playfield:draw()
     if DEBUG_DRAWLINEAREA then
         for row = 1, 20 do
             local factor = self.area[row]/(math.floor(self.columns)*BLOCKSIZE)
-            love.graphics.print(string.format("%.2f", factor*100), 0, (row-1)*PIECESCALE, 0, 0.5, 0.5)
+            love.graphics.print(string.format("%.2f", factor*100), 0, (row-1)*PIECESCALE, 0, 0.5)
         end
     end
 
@@ -168,6 +167,22 @@ end
 function Playfield:clearRow(rows)
     for i = #self.pieces, 1, -1 do
         self.pieces[i]:cut(rows)
+    end
+end
+
+function Playfield:checkClearRow()
+    local toClear = {}
+
+    for row = 1, self.rows do
+        local factor = self.area[row]/(math.floor(self.columns)*BLOCKSIZE)
+
+        if factor >= LINECLEARREQUIREMENT then
+            table.insert(toClear, row)
+        end
+    end
+
+    if #toClear > 0 then
+        self:clearRow(toClear)
     end
 end
 

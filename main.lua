@@ -5,27 +5,29 @@ function love.load()
     require "variables"
     require "util"
     class = require "middleclass"
-    local game = require "game"
+    local Game_a = require "gamestates.game_a"
+    local Game_versus = require "gamestates.game_versus"
 
     love.graphics.setLineWidth(1/SCALE*PIECESCALE)
     love.physics.setMeter(METER)
 
-    backgroundImg = love.graphics.newImage("img/background.png")
+    local font = love.graphics.newImageFont("img/font.png", "0123456789abcdefghijklmnopqrstuvwxyz.:/,\"C-_A* !{}?'()+=><#")
+    love.graphics.setFont(font)
 
-    game.load()
+    gamestate = Game_versus:new()
 end
 
 function love.update(dt)
     dt = frameDebug3.update(dt)
 
-    gamestate.update(dt)
+    gamestate:update(dt)
 end
 
 function love.draw()
     love.graphics.push()
     love.graphics.scale(SCALE, SCALE)
 
-    gamestate.draw()
+    gamestate:draw()
 
     love.graphics.pop()
 end
@@ -39,7 +41,7 @@ function love.keypressed(key)
         debug.debug()
     end
 
-    gamestate.keypressed(key)
+    gamestate:keypressed(key)
 end
 
 function normalizeAngle(a)
