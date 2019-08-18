@@ -22,4 +22,7 @@ function Game:keypressed(key, unicode)
     end
 end
 
+function Game:sendGarbage(toPly, count)
+end
+
 return Game

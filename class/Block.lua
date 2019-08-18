@@ -13,10 +13,6 @@ function Block:initialize(piece, shape, x, y, quad)
     self.fixture:setFriction(PIECEFRICTION)
 end
 
-function Block:update(dt)
-
-end
-
 local shape
 local function blockStencil()
     love.graphics.polygon("fill", shape:getPoints())
@@ -175,6 +171,11 @@ function Block:setSubShapes()
     for i = 1, #points, 2 do
         local x, y = points[i], points[i+1]
 
+        if x < 0 or x > self.piece.playfield.columns*PHYSICSSCALE then
+            -- might crash
+            return
+        end
+
         topRow = math.min(topRow, math.floor(y/PHYSICSSCALE)+1)
         bottomRow = math.max(bottomRow, math.ceil(y/PHYSICSSCALE))
 
@@ -193,6 +194,11 @@ function Block:setSubShapes()
 
         local xn, yn, fraction = self.fixture:rayCast(x1, y, x2, y, 1)
 
+        if not fraction then
+            print(x1, y, x2, y)
+            print(self.fixture:getPoints())
+        end
+
         local hitx = x2 * fraction
 
         rayTraceResults.left[row] = hitx
@@ -202,6 +208,11 @@ function Block:setSubShapes()
         local x2 = 0
 
         local xn, yn, fraction = self.fixture:rayCast(x1, y, x2, y, 1)
+
+        if not fraction then
+            print(x1, y, x2, y)
+            print(self.fixture:getPoints())
+        end
 
         local hitx = x1 * (1-fraction)
 

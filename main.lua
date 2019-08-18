@@ -5,6 +5,7 @@ function love.load()
     require "variables"
     require "util"
     class = require "middleclass"
+    Timer = require "class.Timer"
     local Game_a = require "gamestates.game_a"
     local Game_versus = require "gamestates.game_versus"
 
@@ -21,6 +22,7 @@ function love.update(dt)
     dt = frameDebug3.update(dt)
 
     gamestate:update(dt)
+    Timer.managedUpdate(dt)
 end
 
 function love.draw()

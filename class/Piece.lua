@@ -71,12 +71,6 @@ function Piece:draw()
     love.graphics.pop()
 end
 
-function Piece:update(dt)
-    for _, block in ipairs(self.blocks) do
-        block:update(dt)
-    end
-end
-
 function Piece:movement(dt)
     if love.keyboard.isDown("j") then
         self:rotate(-1)
