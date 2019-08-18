@@ -7,8 +7,8 @@ local backgroundImg = love.graphics.newImage("img/background_versus.png")
 function Game_versus:initialize()
     Game.initialize(self)
 
-    table.insert(self.playfields, Playfield:new(self, 15, 41, 10.25, 20))
-    table.insert(self.playfields, Playfield:new(self, 159, 41, 10.25, 20))
+    table.insert(self.playfields, Playfield:new(self, 15, 41, 10.25, 20, controls[1]))
+    table.insert(self.playfields, Playfield:new(self, 159, 41, 10.25, 20, controls[2]))
 
     self.playfields[1].areaIndicatorsX = (self.playfields[1].columns+1)*PIECESCALE
     self.playfields[1].areaIndicatorsY = 0
@@ -48,14 +48,6 @@ function Game_versus:sendGarbage(fromPlayfield, count)
     end
 
     self.playfields[toPly]:receiveGarbage(count)
-end
-
-function Game_versus:keypressed(key, unicode)
-    if key == "1" then
-        self:sendGarbage(self.playfields[1], 1)
-    end
-
-    Game.keypressed(self, key, unicode)
 end
 
 return Game_versus

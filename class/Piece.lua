@@ -78,30 +78,6 @@ function Piece:draw()
     love.graphics.pop()
 end
 
-function Piece:movement(dt)
-    if love.keyboard.isDown("j") then
-        self:rotate(-1)
-    end
-
-    if love.keyboard.isDown("k") then
-        self:rotate(1)
-    end
-
-    -- Horizontal movement
-    if love.keyboard.isDown("a") then
-        self:move(-1)
-    end
-
-    if love.keyboard.isDown("d") then
-        self:move(1)
-    end
-
-    -- vertical movement
-    if not love.keyboard.isDown("s") then
-        self:limitDownwardVelocity()
-    end
-end
-
 function Piece:move(dir)
     self.body:applyForce(MOVEFORCE*dir, 0)
 end

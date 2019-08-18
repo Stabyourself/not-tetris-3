@@ -16,12 +16,6 @@ function Game:draw()
     love.graphics.print(love.timer.getFPS())
 end
 
-function Game:keypressed(key, unicode)
-    for _, playfield in ipairs(self.playfields) do
-        playfield:keypressed(key, unicode)
-    end
-end
-
 function Game:sendGarbage(toPly, count)
 end
 

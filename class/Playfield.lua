@@ -5,12 +5,13 @@ local pieceTypes = require "class.PieceType"
 local Piece = require "class.Piece"
 local ClearAnimation = require "class.ClearAnimation"
 
-function Playfield:initialize(game, x, y, columns, rows)
+function Playfield:initialize(game, x, y, columns, rows, player)
     self.game = game
     self.x = x
     self.y = y
     self.columns = columns
     self.rows = rows
+    self.player = player
 
     self.score = 0
     self.level = 0
@@ -44,14 +45,13 @@ function Playfield:initialize(game, x, y, columns, rows)
 end
 
 function Playfield:update(dt)
-    -- world is updated in fixed steps to prevent fps-dependency (box2d behaves differently with different deltas, even if the total is the same)
-
     updateGroup(self.clearAnimations, dt)
 
     if not self.paused then
         self.worldUpdateBuffer = self.worldUpdateBuffer + dt
         self.linesUpdateBuffer = self.linesUpdateBuffer + dt
 
+        -- world is updated in fixed steps to prevent fps-dependency (box2d behaves differently with different deltas, even if the total is the same)
         while self.worldUpdateBuffer >= WORLDUPDATEINTERVAL do
             if self.spawnNewPieceNextFrame then
                 -- check if we have garbage to spawn
@@ -59,8 +59,30 @@ function Playfield:update(dt)
                 self.spawnNewPieceNextFrame = false
             end
 
+            -- Movement
             if self.activePiece then
-                self.activePiece:movement(WORLDUPDATEINTERVAL)
+                -- Rotation
+                if self.player:down("action1") then
+                    self.activePiece:rotate(-1)
+                end
+
+                if self.player:down("action2") then
+                    self.activePiece:rotate(1)
+                end
+
+                -- Horizontal movement
+                if self.player:down("left") then
+                    self.activePiece:move(-1)
+                end
+
+                if self.player:down("right") then
+                    self.activePiece:move(1)
+                end
+
+                -- vertical movement
+                if not self.player:down("down") then
+                    self.activePiece:limitDownwardVelocity()
+                end
             end
 
             self.world:update(WORLDUPDATEINTERVAL)
@@ -336,10 +358,6 @@ function Playfield:checkClearRow()
     else
         self:checkGarbageSpawn()
     end
-end
-
-function Playfield:keypressed(key, unicode)
-
 end
 
 return Playfield

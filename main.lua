@@ -1,6 +1,7 @@
 function love.load()
     PROF_CAPTURE = true
     prof = require "lib.jprof.jprof"
+    require "controls"
 
     love.graphics.setDefaultFilter("nearest", "nearest")
 
@@ -24,6 +25,10 @@ end
 function love.update(dt)
     prof.push("frame")
     prof.push("update")
+
+    for i = 1, 2 do
+        controls[i]:update()
+    end
 
     dt = frameDebug3.update(dt)
 
@@ -57,7 +62,9 @@ function love.keypressed(key)
         debug.debug()
     end
 
-    gamestate:keypressed(key)
+    if key == "1" then
+        gamestate:sendGarbage(gamestate.playfields[1], 1)
+    end
 end
 
 function love.quit()
