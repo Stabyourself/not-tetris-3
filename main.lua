@@ -1,5 +1,5 @@
 function love.load()
-    PROF_CAPTURE = true
+    PROF_CAPTURE = false
     prof = require "lib.jprof.jprof"
     require "controls"
 
@@ -9,17 +9,18 @@ function love.load()
     require "variables"
     require "util"
     class = require "middleclass"
-    Timer = require "class.Timer"
+    Timer = require "lib.Timer"
+    local Menu = require "gamestates.menu"
     local Game_a = require "gamestates.game_a"
-    local Game_versus = require "gamestates.game_versus"
 
-    love.graphics.setLineWidth(1/SCALE*PIECESCALE)
+    love.graphics.setLineWidth(1/SCALE*BLOCKSCALE)
     love.physics.setMeter(METER)
 
-    local font = love.graphics.newImageFont("img/font.png", "0123456789abcdefghijklmnopqrstuvwxyz.:/,\"C-_A* !{}?'()+=><#")
+    local font = love.graphics.newImageFont("img/font.png", "0123456789abcdefghijklmnopqrstuvwxyz.:/,\"C-_A* !{}?'()+=><#@")
     love.graphics.setFont(font)
 
-    gamestate = Game_versus:new()
+    gamestate = require("gamestates.menu"):new()
+    gamestate = require("gamestates.game_versus"):new()
 end
 
 function love.update(dt)

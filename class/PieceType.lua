@@ -1,7 +1,5 @@
 local PieceType = class("PieceType")
 
-local img = love.graphics.newImage("img/tiles/0.png")
-
 local quads = {}
 
 for i = 0, 2 do

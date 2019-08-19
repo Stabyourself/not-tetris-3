@@ -65,7 +65,7 @@ end
 
 function Piece:draw()
     love.graphics.push()
-    love.graphics.scale(1/PHYSICSSCALE*PIECESCALE, 1/PHYSICSSCALE*PIECESCALE)
+    love.graphics.scale(1/PHYSICSSCALE*BLOCKSCALE, 1/PHYSICSSCALE*BLOCKSCALE)
     love.graphics.translate(self.body:getPosition())
     love.graphics.rotate(self.body:getAngle())
 

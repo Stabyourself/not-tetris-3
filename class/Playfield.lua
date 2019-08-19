@@ -4,18 +4,24 @@ local Wall = require "class.Wall"
 local pieceTypes = require "class.PieceType"
 local Piece = require "class.Piece"
 local ClearAnimation = require "class.ClearAnimation"
+local pieceTypes = require "class.PieceType"
 
-function Playfield:initialize(game, x, y, columns, rows, player)
+local blockImg = love.graphics.newImage("img/tiles/0.png")
+
+function Playfield:initialize(game, x, y, columns, rows, player, randomizer, mirrored)
     self.game = game
     self.x = x
     self.y = y
     self.columns = columns
     self.rows = rows
     self.player = player
+    self.randomizer = randomizer
+    self.mirrored = mirrored
 
     self.score = 0
     self.level = 0
     self.lines = 0
+    self.piececount = 0
 
     self.queuedGarbage = 0
 
@@ -42,6 +48,8 @@ function Playfield:initialize(game, x, y, columns, rows, player)
 
     self.pieces = {}
     self:nextPiece()
+
+    self:updateLines()
 end
 
 function Playfield:update(dt)
@@ -106,15 +114,39 @@ function Playfield:draw()
     love.graphics.push()
     love.graphics.translate(self.x, self.y)
 
+    -- next
+    love.graphics.push()
+    love.graphics.translate(self.nextPieceX, self.nextPieceY)
+
+    local pieceType = pieceTypes[self.randomizer:getPiece(self.piececount+1, self.mirrored)]
+    for x = 1, #pieceType.map do
+        for y = 1, #pieceType.map[x] do
+            if pieceType.map[x][y] then
+                local rx = x-1-#pieceType.map/2
+                local ry = y-1-#pieceType.map[x]/2
+
+                love.graphics.draw(blockImg, pieceType.map[x][y], rx*BLOCKSCALE, ry*BLOCKSCALE)
+            end
+        end
+    end
+
+    love.graphics.pop()
 
     -- fullness
     for row = 1, self.rows do
         local x = self.areaIndicatorsX
-        local y = self.areaIndicatorsY + (row-1)*PIECESCALE
+        local y = self.areaIndicatorsY + (row-1)*BLOCKSCALE
 
-        local factor = self.area[row]/(math.floor(self.columns)*BLOCKSIZE)
+        local factor = math.min(1, self.area[row]/(math.floor(self.columns)*BLOCKSIZE*LINECLEARREQUIREMENT))
 
-        love.graphics.rectangle("fill", x, y, factor*self.areaIndicatorsWidth, PIECESCALE)
+        if row%2 == 0 then
+            love.graphics.setColor(LINECOLORS[2])
+        else
+            love.graphics.setColor(0, 0, 0)
+        end
+        love.graphics.rectangle("fill", x, y, math.sign(self.areaIndicatorsWidth)*BLOCKSCALE, BLOCKSCALE)
+        love.graphics.setColor(1, 1, 1)
+        love.graphics.rectangle("fill", x, y, factor*self.areaIndicatorsWidth, BLOCKSCALE)
     end
 
     -- overlay
@@ -122,13 +154,13 @@ function Playfield:draw()
         love.graphics.setColor(LINECOLORS[2])
 
         for row = 2+math.fmod(self.rows, 1), self.rows, 2 do
-            love.graphics.rectangle("fill", 0, (row-1)*PIECESCALE, self.columns*PIECESCALE, PIECESCALE)
+            love.graphics.rectangle("fill", 0, (row-1)*BLOCKSCALE, self.columns*BLOCKSCALE, BLOCKSCALE)
         end
 
         love.graphics.setColor(1, 1, 1)
     end
 
-    love.graphics.setScissor(self.x*SCALE, self.y*SCALE, self.columns*PIECESCALE*SCALE, self.rows*PIECESCALE*SCALE)
+    love.graphics.setScissor(self.x*SCALE, self.y*SCALE, self.columns*BLOCKSCALE*SCALE, self.rows*BLOCKSCALE*SCALE)
 
     prof.push("pieces")
     for _, v in ipairs(self.pieces) do
@@ -144,7 +176,7 @@ function Playfield:draw()
     if DEBUG_DRAWLINEAREA then
         for row = 1, self.rows do
             local factor = self.area[row]/(math.floor(self.columns)*BLOCKSIZE)
-            love.graphics.print(string.format("%.2f", factor*100), 0, (row-1)*PIECESCALE, 0, 0.5)
+            love.graphics.print(string.format("%.2f", factor*100), 0, (row-1)*BLOCKSCALE, 0, 0.5)
         end
     end
 
@@ -187,7 +219,8 @@ function Playfield:updateLines()
 end
 
 function Playfield:nextPiece()
-    local pieceNum = love.math.random(1, #pieceTypes)
+    self.piececount = self.piececount + 1
+    local pieceNum = self.randomizer:getPiece(self.piececount, self.mirrored)
     local piece = Piece.fromPieceType(self, pieceTypes[pieceNum])
 
     self.activePiece = piece
@@ -196,8 +229,10 @@ function Playfield:nextPiece()
 end
 
 function Playfield:gameOver()
-    self.activePiece = nil
+    self.dead = true
+    self.activePiece = false
     self.walls[3].body:destroy()
+    self.game:topOut(self)
 end
 
 function Playfield.postSolve(a, b)
@@ -271,27 +306,46 @@ function Playfield:checkGarbageSpawn()
     end
 end
 
-local garbageShapes = {}
+local garbageShapes1 = {}
 for i = 0, 2 do
-    garbageShapes[i+1] = {
-        shape=GARBAGESHAPE.shape,
-        x=GARBAGESHAPE.x,
-        y=GARBAGESHAPE.y,
+    garbageShapes1[i+1] = {
+        shape={
+            -PHYSICSSCALE, -PHYSICSSCALE/2,
+            0, -PHYSICSSCALE/2,
+            0, PHYSICSSCALE/2,
+            -PHYSICSSCALE, PHYSICSSCALE/2
+        },
+        x=-1,
+        y=-.5,
+        quad = love.graphics.newQuad(i*10+1, 1, 8, 8, 30, 10)
+    }
+end
+local garbageShapes2 = {}
+for i = 0, 2 do
+    garbageShapes2[i+1] = {
+        shape={
+            0, -PHYSICSSCALE/2,
+            PHYSICSSCALE, -PHYSICSSCALE/2,
+            PHYSICSSCALE, PHYSICSSCALE/2,
+            0, PHYSICSSCALE/2
+        },
+        x=0,
+        y=-.5,
         quad = love.graphics.newQuad(i*10+1, 1, 8, 8, 30, 10)
     }
 end
 
 function Playfield:spawnGarbage(count)
     for y = 1, count do
-        for i = 1, GARBAGECOUNT do
-            local px = love.math.random()*((self.columns-1)*PHYSICSSCALE)+PHYSICSSCALE/2
-            local py = -y*PHYSICSSCALE*1.5
+        for i = 1, GARBAGECOUNT/2 do
+            local px = ((self.columns-1)/4)*PHYSICSSCALE*i-0.5*PHYSICSSCALE
+            local py = -y*PHYSICSSCALE*2
 
-            local piece = Piece.fromShapes(self, {garbageShapes[love.math.random(#garbageShapes)]})
+            local piece = Piece.fromShapes(self, {garbageShapes1[love.math.random(#garbageShapes1)], garbageShapes2[love.math.random(#garbageShapes2)]})
             self:addPiece(piece)
 
             piece.body:setPosition(px, py)
-            piece.body:setAngularVelocity((love.math.random()*2-1)*20)
+            piece.body:setAngularVelocity((love.math.random()*2-1)*10)
         end
     end
 end

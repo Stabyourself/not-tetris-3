@@ -32,7 +32,7 @@ function Block:draw()
 
         love.graphics.translate(self.x*PHYSICSSCALE, self.y*PHYSICSSCALE)
 
-        love.graphics.draw(img, self.quad, 0, 0, 0, PHYSICSSCALE/PIECESCALE)
+        love.graphics.draw(img, self.quad, 0, 0, 0, PHYSICSSCALE/BLOCKSCALE)
 
         love.graphics.setStencilTest()
         love.graphics.pop()

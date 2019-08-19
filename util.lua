@@ -280,3 +280,13 @@ function setPointTable(t, x1, y1, x2, y2, x3, y3, x4, y4, x5, y5, x6, y6, x7, y7
 	t[15] = x8
 	t[16] = y8
 end
+
+function math.sign(a)
+	if a < 0 then
+		return -1
+	elseif a > 0 then
+		return 1
+	else
+		return 0
+	end
+end

@@ -9,6 +9,7 @@ controls[1] = baton.new({
         down = {'key:s', 'axis:lefty+', 'button:dpdown'},
         action1 = {'key:j', 'button:a'},
         action2 = {'key:k', 'button:b'},
+        start = {'key:return', 'button:start'},
     },
     pairs = {
         move = {'left', 'right', 'up', 'down'}
@@ -24,6 +25,7 @@ controls[2] = baton.new({
         down = {'key:down', 'axis:lefty+', 'button:dpdown'},
         action1 = {'key:kp1', 'button:a'},
         action2 = {'key:kp2', 'button:b'},
+        start = {'key:kp5', 'button:start'},
     },
     pairs = {
         move = {'left', 'right', 'up', 'down'}
