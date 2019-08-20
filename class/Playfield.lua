@@ -137,7 +137,13 @@ function Playfield:draw()
         local x = self.areaIndicatorsX
         local y = self.areaIndicatorsY + (row-1)*BLOCKSCALE
 
-        local factor = math.min(1, self.area[row]/(math.floor(self.columns)*BLOCKSIZE*LINECLEARREQUIREMENT))
+        local mul = 0.9
+
+        if self.area[row]/(math.floor(self.columns)*BLOCKSIZE) >= LINECLEARREQUIREMENT then
+            mul = 1
+        end
+
+        local factor = math.min(1, self.area[row]/(math.floor(self.columns)*BLOCKSIZE*LINECLEARREQUIREMENT))*mul
 
         if row%2 == 0 then
             love.graphics.setColor(LINECOLORS[2])

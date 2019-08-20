@@ -167,15 +167,20 @@ function Block:cut(rows)
         end
 
         for i = #shapes, 2, -1 do
-            local shape = love.physics.newPolygonShape(shapes[i])
-            table.insert(self.piece.blocks, Block:new(self.piece, shape, self.x, self.y, self.quad, self.quadI))
+            if #shapes[i] >= 6 then
+                local shape = love.physics.newPolygonShape(shapes[i])
+                table.insert(self.piece.blocks, Block:new(self.piece, shape, self.x, self.y, self.quad, self.quadI))
+
+            else
+                print("Prevented a crash during Block cutting creation.")
+            end
         end
 
         self.fixture:destroy()
         self.shape = love.physics.newPolygonShape(shapes[1])
         self.fixture = love.physics.newFixture(self.piece.body, self.shape)
         self.fixture:setFriction(PIECEFRICTION)
-        
+
         self:setMesh()
     else
         self.fixture:destroy()
