@@ -2,16 +2,19 @@ local Block = class("Block")
 
 local img = love.graphics.newImage("img/tiles/0.png")
 
-function Block:initialize(piece, shape, x, y, quad)
+function Block:initialize(piece, shape, x, y, quad, quadI)
     self.piece = piece
     self.shape = shape
     self.x = x
     self.y = y
     self.quad = quad
+    self.quadI = quadI
 
     self.fixture = love.physics.newFixture(self.piece.body, self.shape)
     self.fixture:setFriction(PIECEFRICTION)
     self.subShapes = {}
+
+    self:setMesh()
 
     for row = 1, self.piece.playfield.rows do
         self.subShapes[row] = {}
@@ -27,16 +30,16 @@ function Block:draw()
     love.graphics.push()
     if not DEBUG_HIDEBLOCKS then
         shape = self.shape
-        love.graphics.stencil(blockStencil, "replace", 1)
-        love.graphics.setStencilTest("greater", 0)
+        -- love.graphics.stencil(blockStencil, "replace", 1)
+        -- love.graphics.setStencilTest("greater", 0)
 
         love.graphics.translate(self.x*PHYSICSSCALE, self.y*PHYSICSSCALE)
 
-        love.graphics.draw(img, self.quad, 0, 0, 0, PHYSICSSCALE/BLOCKSCALE)
+        love.graphics.draw(self.mesh, 0, 0, 0, PHYSICSSCALE/BLOCKSCALE)
 
-        love.graphics.setStencilTest()
-        love.graphics.pop()
+        -- love.graphics.setStencilTest()
     end
+    love.graphics.pop()
 
     self:debugDraw()
 end
@@ -76,6 +79,28 @@ function Block:debugDraw()
         love.graphics.print(#points/2, points[1], points[2])
         love.graphics.setColor(1, 1, 1)
     end
+end
+
+local meshPoints = {}
+local shapePoints = {}
+function Block:setMesh()
+    setPointTable(shapePoints, self.shape:getPoints())
+
+    iclearTable(meshPoints)
+
+    for i = 1, #shapePoints, 2 do
+        -- print(shapePoints[i]/PHYSICSSCALE, self.x)
+        local x = (shapePoints[i]/PHYSICSSCALE - self.x)
+        local y = (shapePoints[i+1]/PHYSICSSCALE - self.y)
+
+        table.insert(meshPoints, {
+            x*BLOCKSCALE, y*BLOCKSCALE,
+            x/3*8/10 + (self.quadI-1)/3 + 1/30, y*8/10 + 1/10
+        })
+    end
+
+    self.mesh = love.graphics.newMesh(meshPoints)
+    self.mesh:setTexture(img)
 end
 
 function Block:cut(rows)
@@ -143,13 +168,15 @@ function Block:cut(rows)
 
         for i = #shapes, 2, -1 do
             local shape = love.physics.newPolygonShape(shapes[i])
-            table.insert(self.piece.blocks, Block:new(self.piece, shape, self.x, self.y, self.quad))
+            table.insert(self.piece.blocks, Block:new(self.piece, shape, self.x, self.y, self.quad, self.quadI))
         end
 
         self.fixture:destroy()
         self.shape = love.physics.newPolygonShape(shapes[1])
         self.fixture = love.physics.newFixture(self.piece.body, self.shape)
         self.fixture:setFriction(PIECEFRICTION)
+        
+        self:setMesh()
     else
         self.fixture:destroy()
         self.removeMe = true

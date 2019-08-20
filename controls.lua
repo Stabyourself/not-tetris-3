@@ -3,13 +3,13 @@ controls = {}
 
 controls[1] = baton.new({
     controls = {
-        left = {'key:a', 'axis:leftx-', 'button:dpleft'},
-        right = {'key:d', 'axis:leftx+', 'button:dpright'},
-        up = {'key:w', 'axis:lefty-', 'button:dpup'},
-        down = {'key:s', 'axis:lefty+', 'button:dpdown'},
-        action1 = {'key:j', 'button:a'},
-        action2 = {'key:k', 'button:b'},
-        start = {'key:return', 'button:start'},
+        left = {'key:a', 'axis:leftx-', 'hat:1l', 'hat:1ld'},
+        right = {'key:d', 'axis:leftx+', 'hat:1r', 'hat:1rd'},
+        up = {'key:w', 'axis:lefty-', 'hat:1u'},
+        down = {'key:s', 'axis:lefty+', 'hat:1d', 'hat:1ld', 'hat:1rd'},
+        action1 = {'key:j', 'button:2'},
+        action2 = {'key:k', 'button:1'},
+        start = {'key:return', 'button:4'},
     },
     pairs = {
         move = {'left', 'right', 'up', 'down'}
@@ -19,13 +19,13 @@ controls[1] = baton.new({
 
 controls[2] = baton.new({
     controls = {
-        left = {'key:left', 'axis:leftx-', 'button:dpleft'},
-        right = {'key:right', 'axis:leftx+', 'button:dpright'},
-        up = {'key:up', 'axis:lefty-', 'button:dpup'},
-        down = {'key:down', 'axis:lefty+', 'button:dpdown'},
-        action1 = {'key:kp1', 'button:a'},
-        action2 = {'key:kp2', 'button:b'},
-        start = {'key:kp5', 'button:start'},
+        left = {'key:left', 'axis:leftx-', 'hat:1l', 'hat:1ld'},
+        right = {'key:right', 'axis:leftx+', 'hat:1r', 'hat:1rd'},
+        up = {'key:up', 'axis:lefty-', 'hat:1u'},
+        down = {'key:down', 'axis:lefty+', 'hat:1d', 'hat:1ld', 'hat:1rd'},
+        action1 = {'key:kp1', 'button:2'},
+        action2 = {'key:kp2', 'button:1'},
+        start = {'key:kp5', 'button:4'},
     },
     pairs = {
         move = {'left', 'right', 'up', 'down'}

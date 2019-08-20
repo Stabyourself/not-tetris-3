@@ -125,7 +125,7 @@ function Playfield:draw()
                 local rx = x-1-#pieceType.map/2
                 local ry = y-1-#pieceType.map[x]/2
 
-                love.graphics.draw(blockImg, pieceType.map[x][y], rx*BLOCKSCALE, ry*BLOCKSCALE)
+                love.graphics.draw(blockImg, pieceType.map[x][y].quad, rx*BLOCKSCALE, ry*BLOCKSCALE)
             end
         end
     end
@@ -160,7 +160,7 @@ function Playfield:draw()
         love.graphics.setColor(1, 1, 1)
     end
 
-    love.graphics.setScissor(self.x*SCALE, self.y*SCALE, self.columns*BLOCKSCALE*SCALE, self.rows*BLOCKSCALE*SCALE)
+    love.graphics.setScissor(self.x*SCALE+xOffset, self.y*SCALE+yOffset, self.columns*BLOCKSCALE*SCALE, self.rows*BLOCKSCALE*SCALE)
 
     prof.push("pieces")
     for _, v in ipairs(self.pieces) do
@@ -317,7 +317,8 @@ for i = 0, 2 do
         },
         x=-1,
         y=-.5,
-        quad = love.graphics.newQuad(i*10+1, 1, 8, 8, 30, 10)
+        quad = love.graphics.newQuad(i*10+1, 1, 8, 8, 30, 10),
+        quadI = i+1,
     }
 end
 local garbageShapes2 = {}
@@ -331,7 +332,8 @@ for i = 0, 2 do
         },
         x=0,
         y=-.5,
-        quad = love.graphics.newQuad(i*10+1, 1, 8, 8, 30, 10)
+        quad = love.graphics.newQuad(i*10+1, 1, 8, 8, 30, 10),
+        quadI = i+1,
     }
 end
 

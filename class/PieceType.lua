@@ -20,7 +20,7 @@ function PieceType:initialize(map)
             local char = map[y]:sub(x, x)
 
             if char ~= " " then
-                self.map[x][y] = quads[char]
+                self.map[x][y] = {quad=quads[char], quadI=tonumber(char)}
             else
                 self.map[x][y] = false
             end

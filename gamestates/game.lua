@@ -13,7 +13,7 @@ function Game:draw()
         playfield:draw()
     end
 
-    love.graphics.print(love.timer.getFPS())
+    love.graphics.print("fps: " .. love.timer.getFPS())
 end
 
 function Game:sendGarbage(toPly, count)

@@ -1,4 +1,9 @@
+xOffset = 0
+yOffset = 0
+
 function love.load()
+    require "variables"
+    autoScale()
     PROF_CAPTURE = false
     prof = require "lib.jprof.jprof"
     require "controls"
@@ -6,7 +11,6 @@ function love.load()
     love.graphics.setDefaultFilter("nearest", "nearest")
 
     frameDebug3 = require "class.FrameDebug3"
-    require "variables"
     require "util"
     class = require "middleclass"
     Timer = require "lib.Timer"
@@ -20,7 +24,22 @@ function love.load()
     love.graphics.setFont(font)
 
     gamestate = require("gamestates.menu"):new()
-    gamestate = require("gamestates.game_versus"):new()
+    -- gamestate = require("gamestates.game_versus"):new()
+end
+
+function autoScale()
+    local width = love.graphics.getWidth()
+    local height = love.graphics.getHeight()
+
+    local maxScale = math.min(width/WIDTH, height/HEIGHT)
+
+    local scale = math.floor(maxScale)
+
+
+    SCALE = scale
+
+    xOffset = (scale*WIDTH-width)/2+width/2
+    yOffset = 100
 end
 
 function love.update(dt)
@@ -43,6 +62,7 @@ function love.draw()
     prof.push("draw")
 
     love.graphics.push()
+    love.graphics.translate(xOffset, yOffset)
     love.graphics.scale(SCALE, SCALE)
 
     gamestate:draw()

@@ -34,7 +34,7 @@ function Menu:draw()
     love.graphics.draw(logo, (WIDTH-logo:getWidth()*2/3)/2, 8, 0, 2/3)
     love.graphics.printf(
 [[this is an alpha version
-of the game.
+of not tetris 3.
 
 
 let us know what you think!
