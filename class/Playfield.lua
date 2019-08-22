@@ -6,9 +6,13 @@ local Piece = require "class.Piece"
 local ClearAnimation = require "class.ClearAnimation"
 local pieceTypes = require "class.PieceType"
 
-local blockImg = love.graphics.newImage("img/tiles/0.png")
+local blockQuads = {}
 
-function Playfield:initialize(game, x, y, columns, rows, player, randomizer, mirrored)
+for i = 1, 3 do
+    blockQuads[i] = love.graphics.newQuad((i-1)*10+1, 1, 8, 8, 30, 10)
+end
+
+function Playfield:initialize(game, x, y, columns, rows, player, randomizer, mirrored, blockGraphicsPack)
     self.game = game
     self.x = x
     self.y = y
@@ -17,6 +21,7 @@ function Playfield:initialize(game, x, y, columns, rows, player, randomizer, mir
     self.player = player
     self.randomizer = randomizer
     self.mirrored = mirrored
+    self.blockGraphicsPack = blockGraphicsPack
 
     self.score = 0
     self.level = 0
@@ -125,7 +130,7 @@ function Playfield:draw()
                 local rx = x-1-#pieceType.map/2
                 local ry = y-1-#pieceType.map[x]/2
 
-                love.graphics.draw(blockImg, pieceType.map[x][y].quad, rx*BLOCKSCALE, ry*BLOCKSCALE)
+                love.graphics.draw(self:getBlockGraphic(), blockQuads[pieceType.map[x][y]], rx*BLOCKSCALE, ry*BLOCKSCALE)
             end
         end
     end
@@ -200,6 +205,10 @@ end
 
 function Playfield:rowToWorld(y)
     return y*PHYSICSSCALE
+end
+
+function Playfield:getBlockGraphic()
+    return self.blockGraphicsPack:getGraphic(self.level)
 end
 
 function Playfield:addArea(row, area)
@@ -323,7 +332,6 @@ for i = 0, 2 do
         },
         x=-1,
         y=-.5,
-        quad = love.graphics.newQuad(i*10+1, 1, 8, 8, 30, 10),
         quadI = i+1,
     }
 end
@@ -338,7 +346,6 @@ for i = 0, 2 do
         },
         x=0,
         y=-.5,
-        quad = love.graphics.newQuad(i*10+1, 1, 8, 8, 30, 10),
         quadI = i+1,
     }
 end
@@ -349,7 +356,13 @@ function Playfield:spawnGarbage(count)
             local px = ((self.columns-1)/4)*PHYSICSSCALE*i-0.5*PHYSICSSCALE
             local py = -y*PHYSICSSCALE*2
 
-            local piece = Piece.fromShapes(self, {garbageShapes1[love.math.random(#garbageShapes1)], garbageShapes2[love.math.random(#garbageShapes2)]})
+            local shape1 = garbageShapes1[love.math.random(#garbageShapes1)]
+            local shape2 = garbageShapes2[love.math.random(#garbageShapes2)]
+
+            shape1.img = self:getBlockGraphic()
+            shape2.img = self:getBlockGraphic()
+
+            local piece = Piece.fromShapes(self, {shape1, shape2})
             self:addPiece(piece)
 
             piece.body:setPosition(px, py)
@@ -385,6 +398,10 @@ function Playfield:checkClearRow()
             table.insert(toClear, row)
             totalFactor = totalFactor + factor
         end
+    end
+
+    if #toClear >= 4 then
+        flashStuff()
     end
 
     if #toClear > 0 then

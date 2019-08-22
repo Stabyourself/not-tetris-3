@@ -3,7 +3,10 @@ Timer = class("Timer")
 local timers = {}
 
 function Timer.setTimer(func, t)
-	table.insert(timers, Timer:new(func, t))
+	local timer = Timer:new(func, t)
+	table.insert(timers, timer)
+
+	return timer
 end
 
 function Timer.managedUpdate(dt)

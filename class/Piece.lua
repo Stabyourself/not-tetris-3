@@ -27,7 +27,7 @@ function Piece.fromPieceType(playfield, pieceType)
 
                 local shape = love.physics.newRectangleShape((rx+.5)*PHYSICSSCALE, (ry+.5)*PHYSICSSCALE, PHYSICSSCALE, PHYSICSSCALE)
 
-                local block = Block:new(piece, shape, rx, ry, pieceType.map[x][y].quad, pieceType.map[x][y].quadI)
+                local block = Block:new(piece, shape, rx, ry, playfield:getBlockGraphic(), pieceType.map[x][y])
                 table.insert(piece.blocks, block)
             end
         end
@@ -41,13 +41,13 @@ function Piece.fromShapes(playfield, shapes)
 
     if not shapes[1] then
         local b2shape = love.physics.newPolygonShape(shape.shape)
-        local block = Block:new(piece, b2shape, shape.x, shape.y, shape.quad, shape.quadI)
+        local block = Block:new(piece, b2shape, shape.x, shape.y, shape.img, shape.quadI)
         table.insert(piece.blocks, block)
 
     else
         for _, shape in ipairs(shapes) do
             local b2shape = love.physics.newPolygonShape(shape.shape)
-            local block = Block:new(piece, b2shape, shape.x, shape.y, shape.quad, shape.quadI)
+            local block = Block:new(piece, b2shape, shape.x, shape.y, shape.img, shape.quadI)
             table.insert(piece.blocks, block)
         end
     end
@@ -197,7 +197,7 @@ function Piece:separateBlocks()
                     shape = {block.shape:getPoints()},
                     x = block.x,
                     y = block.y,
-                    quad = block.quad,
+                    img = block.img,
                     quadI = block.quadI,
                 })
             end

@@ -31,6 +31,9 @@ function Menu:update(dt)
 end
 
 function Menu:draw()
+    love.graphics.setColor(0, 0, 0)
+    love.graphics.rectangle("fill", 0, 0, WIDTH, HEIGHT)
+    love.graphics.setColor(1, 1, 1)
     love.graphics.draw(logo, (WIDTH-logo:getWidth()*2/3)/2, 8, 0, 2/3)
     love.graphics.printf(
 [[this is an alpha version

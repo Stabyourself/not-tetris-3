@@ -1,11 +1,5 @@
 local PieceType = class("PieceType")
 
-local quads = {}
-
-for i = 0, 2 do
-    quads[tostring(i+1)] = love.graphics.newQuad(i*10+1, 1, 8, 8, 30, 10)
-end
-
 function PieceType:initialize(map)
     self.map = map
 
@@ -20,7 +14,7 @@ function PieceType:initialize(map)
             local char = map[y]:sub(x, x)
 
             if char ~= " " then
-                self.map[x][y] = {quad=quads[char], quadI=tonumber(char)}
+                self.map[x][y] = tonumber(char)
             else
                 self.map[x][y] = false
             end

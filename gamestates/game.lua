@@ -12,8 +12,6 @@ function Game:draw()
     for _, playfield in ipairs(self.playfields) do
         playfield:draw()
     end
-
-    love.graphics.print("fps: " .. love.timer.getFPS())
 end
 
 function Game:sendGarbage(toPly, count)

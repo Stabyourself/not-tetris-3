@@ -1,9 +1,12 @@
 xOffset = 0
 yOffset = 0
 
+local tileImg
+local tileImgFlashing
+local flashFrame = false
+
 function love.load()
     require "variables"
-    autoScale()
     PROF_CAPTURE = false
     prof = require "lib.jprof.jprof"
     require "controls"
@@ -23,23 +26,28 @@ function love.load()
     local font = love.graphics.newImageFont("img/font.png", "0123456789abcdefghijklmnopqrstuvwxyz.:/,\"C-_A* !{}?'()+=><#@")
     love.graphics.setFont(font)
 
+    tileImg = love.graphics.newImage("img/border_tiled.png")
+    tileImg:setWrap("repeat", "repeat")
+    tileImgFlashing = love.graphics.newImage("img/border_tiled_flashing.png")
+    tileImgFlashing:setWrap("repeat", "repeat")
+
     gamestate = require("gamestates.menu"):new()
     -- gamestate = require("gamestates.game_versus"):new()
+    love.resize( love.graphics.getDimensions())
 end
 
-function autoScale()
-    local width = love.graphics.getWidth()
-    local height = love.graphics.getHeight()
-
-    local maxScale = math.min(width/WIDTH, height/HEIGHT)
+function love.resize( w, h )
+    local maxScale = math.min(w/WIDTH, h/HEIGHT)
 
     local scale = math.floor(maxScale)
 
 
     SCALE = scale
 
-    xOffset = (scale*WIDTH-width)/2+width/2
-    yOffset = 100
+    xOffset = math.ceil(((w-SCALE*WIDTH)/2)/SCALE)*SCALE
+    yOffset = math.ceil(((h-SCALE*HEIGHT)/2)/SCALE)*SCALE
+
+    tileQuad = love.graphics.newQuad(8, 0, w, h, 64, 64)
 end
 
 function love.update(dt)
@@ -56,10 +64,20 @@ function love.update(dt)
     Timer.managedUpdate(dt)
 
     prof.pop("update")
+
+    if flashTimer and flashTimer:getTimeLeft() > 0 then
+        flashFrame = not flashFrame
+    end
 end
 
 function love.draw()
     prof.push("draw")
+
+    if flashFrame then
+        love.graphics.draw(tileImgFlashing, tileQuad, 0, 0, 0, SCALE)
+    else
+        love.graphics.draw(tileImg, tileQuad, 0, 0, 0, SCALE)
+    end
 
     love.graphics.push()
     love.graphics.translate(xOffset, yOffset)
@@ -69,9 +87,19 @@ function love.draw()
 
     love.graphics.pop()
 
+    love.graphics.push()
+    love.graphics.scale(SCALE, SCALE)
+
+    love.graphics.print("fps: " .. love.timer.getFPS())
+    love.graphics.pop()
+
 	prof.pop("draw")
 
 	prof.pop("frame")
+end
+
+function flashStuff()
+    flashTimer = Timer.setTimer(function() flashFrame = false end, 0.5)
 end
 
 function love.keypressed(key)

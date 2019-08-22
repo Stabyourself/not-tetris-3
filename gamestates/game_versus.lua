@@ -2,19 +2,17 @@ local Game = require "gamestates.Game"
 local Game_versus = class("Game_versus", Game)
 local Playfield = require "class.Playfield"
 local NESRandomizer = require "class.NESRandomizer"
+local blockGraphicPacks = require "blockGraphicsPackLoader"
 
-local tileImg = love.graphics.newImage("img/border_tiled.png")
-tileImg:setWrap("repeat", "repeat")
 local backgroundImg = love.graphics.newImage("img/background_versus.png")
 
 function Game_versus:initialize()
-    self.tileQuad = love.graphics.newQuad(8, 0, WIDTH, HEIGHT, 64, 64)
     Game.initialize(self)
 
     self.randomizer = NESRandomizer:new()
 
-    table.insert(self.playfields, Playfield:new(self, 15, 38, 10.25, 20, controls[1], self.randomizer, false))
-    table.insert(self.playfields, Playfield:new(self, 159, 38, 10.25, 20, controls[2], self.randomizer, true))
+    table.insert(self.playfields, Playfield:new(self, 15, 38, 10.25, 20, controls[1], self.randomizer, false, blockGraphicPacks.NES))
+    table.insert(self.playfields, Playfield:new(self, 159, 38, 10.25, 20, controls[2], self.randomizer, true, blockGraphicPacks.NES))
 
     self.playfields[1].areaIndicatorsX = (self.playfields[1].columns+1)*BLOCKSCALE+3
 
@@ -33,7 +31,6 @@ function Game_versus:initialize()
 end
 
 function Game_versus:draw()
-    love.graphics.draw(tileImg, self.tileQuad)
     love.graphics.draw(backgroundImg)
 
     -- p1

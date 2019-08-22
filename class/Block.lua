@@ -1,13 +1,11 @@
 local Block = class("Block")
 
-local img = love.graphics.newImage("img/tiles/0.png")
-
-function Block:initialize(piece, shape, x, y, quad, quadI)
+function Block:initialize(piece, shape, x, y, img, quadI)
     self.piece = piece
     self.shape = shape
     self.x = x
     self.y = y
-    self.quad = quad
+    self.img = img
     self.quadI = quadI
 
     self.fixture = love.physics.newFixture(self.piece.body, self.shape)
@@ -21,25 +19,16 @@ function Block:initialize(piece, shape, x, y, quad, quadI)
     end
 end
 
-local shape
-local function blockStencil()
-    love.graphics.polygon("fill", shape:getPoints())
-end
-
 function Block:draw()
-    love.graphics.push()
     if not DEBUG_HIDEBLOCKS then
-        shape = self.shape
-        -- love.graphics.stencil(blockStencil, "replace", 1)
-        -- love.graphics.setStencilTest("greater", 0)
+        love.graphics.push()
 
         love.graphics.translate(self.x*PHYSICSSCALE, self.y*PHYSICSSCALE)
 
         love.graphics.draw(self.mesh, 0, 0, 0, PHYSICSSCALE/BLOCKSCALE)
 
-        -- love.graphics.setStencilTest()
+        love.graphics.pop()
     end
-    love.graphics.pop()
 
     self:debugDraw()
 end
@@ -89,7 +78,6 @@ function Block:setMesh()
     iclearTable(meshPoints)
 
     for i = 1, #shapePoints, 2 do
-        -- print(shapePoints[i]/PHYSICSSCALE, self.x)
         local x = (shapePoints[i]/PHYSICSSCALE - self.x)
         local y = (shapePoints[i+1]/PHYSICSSCALE - self.y)
 
@@ -100,7 +88,7 @@ function Block:setMesh()
     end
 
     self.mesh = love.graphics.newMesh(meshPoints)
-    self.mesh:setTexture(img)
+    self.mesh:setTexture(self.img)
 end
 
 function Block:cut(rows)
@@ -176,12 +164,16 @@ function Block:cut(rows)
             end
         end
 
-        self.fixture:destroy()
-        self.shape = love.physics.newPolygonShape(shapes[1])
-        self.fixture = love.physics.newFixture(self.piece.body, self.shape)
-        self.fixture:setFriction(PIECEFRICTION)
+        if #shapes[1] >= 6 then
+            self.fixture:destroy()
+            self.shape = love.physics.newPolygonShape(shapes[1])
+            self.fixture = love.physics.newFixture(self.piece.body, self.shape)
+            self.fixture:setFriction(PIECEFRICTION)
 
-        self:setMesh()
+            self:setMesh()
+        else
+            print("Prevented a crash during Block cutting creation. (2)")
+        end
     else
         self.fixture:destroy()
         self.removeMe = true
