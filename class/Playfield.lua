@@ -351,23 +351,26 @@ for i = 0, 2 do
 end
 
 function Playfield:spawnGarbage(count)
-    for y = 1, count do
-        for i = 1, GARBAGECOUNT/2 do
-            local px = ((self.columns-1)/4)*PHYSICSSCALE*i-0.5*PHYSICSSCALE
-            local py = -y*PHYSICSSCALE*2
+    local y = 1
 
-            local shape1 = garbageShapes1[love.math.random(#garbageShapes1)]
-            local shape2 = garbageShapes2[love.math.random(#garbageShapes2)]
+    for garbageNum = 1, count do
+        local y = math.ceil(garbageNum/4)
+        local x = garbageNum%4+1
 
-            shape1.img = self:getBlockGraphic()
-            shape2.img = self:getBlockGraphic()
+        local px = ((self.columns-1)/4)*PHYSICSSCALE*x-0.5*PHYSICSSCALE
+        local py = -y*PHYSICSSCALE*2
 
-            local piece = Piece.fromShapes(self, {shape1, shape2})
-            self:addPiece(piece)
+        local shape1 = garbageShapes1[love.math.random(#garbageShapes1)]
+        local shape2 = garbageShapes2[love.math.random(#garbageShapes2)]
 
-            piece.body:setPosition(px, py)
-            piece.body:setAngularVelocity((love.math.random()*2-1)*10)
-        end
+        shape1.img = self:getBlockGraphic()
+        shape2.img = self:getBlockGraphic()
+
+        local piece = Piece.fromShapes(self, {shape1, shape2})
+        self:addPiece(piece)
+
+        piece.body:setPosition(px, py)
+        piece.body:setAngularVelocity((love.math.random()*2-1)*10)
     end
 end
 

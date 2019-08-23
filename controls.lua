@@ -25,7 +25,7 @@ controls[2] = baton.new({
         down = {'key:down', 'axis:lefty+', 'hat:1d', 'hat:1ld', 'hat:1rd'},
         action1 = {'key:kp1', 'button:2'},
         action2 = {'key:kp2', 'button:1'},
-        start = {'key:kp5', 'button:4'},
+        start = {'key:kp5', "key:rshift", 'button:4'},
     },
     pairs = {
         move = {'left', 'right', 'up', 'down'}
