@@ -19,7 +19,7 @@ function Menu:update(dt)
             end
         end
 
-        if controls[i]:pressed("action1") or controls[i]:pressed("action2") or controls[i]:pressed("start") then
+        if controls[i]:pressed("rotate_left") or controls[i]:pressed("rotate_right") or controls[i]:pressed("start") then
             self.ready[i] = true
             self.unreadyTimer[i] = 0
 

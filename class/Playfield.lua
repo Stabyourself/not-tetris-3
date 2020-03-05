@@ -5,6 +5,7 @@ local pieceTypes = require "class.PieceType"
 local Piece = require "class.Piece"
 local ClearAnimation = require "class.ClearAnimation"
 local pieceTypes = require "class.PieceType"
+local audioManager = require "lib.audioManager3"
 
 local blockQuads = {}
 
@@ -75,21 +76,37 @@ function Playfield:update(dt)
             -- Movement
             if self.activePiece then
                 -- Rotation
-                if self.player:down("action1") then
+                if self.player:down("rotate_left") then
                     self.activePiece:rotate(-1)
+
+                    if self.player:pressed("rotate_left") then
+                        audioManager.play("turn")
+                    end
                 end
 
-                if self.player:down("action2") then
+                if self.player:down("rotate_right") then
                     self.activePiece:rotate(1)
+
+                    if self.player:pressed("rotate_right") then
+                        audioManager.play("turn")
+                    end
                 end
 
                 -- Horizontal movement
                 if self.player:down("left") then
                     self.activePiece:move(-1)
+
+                    if self.player:pressed("left") then
+                        audioManager.play("move")
+                    end
                 end
 
                 if self.player:down("right") then
                     self.activePiece:move(1)
+
+                    if self.player:pressed("right") then
+                        audioManager.play("move")
+                    end
                 end
 
                 -- vertical movement
@@ -411,10 +428,6 @@ function Playfield:checkClearRow()
         end
     end
 
-    if #toClear >= 4 then
-        flashStuff()
-    end
-
     if #toClear > 0 then
         -- add lines
         local oldLines = self.lines
@@ -444,8 +457,14 @@ function Playfield:checkClearRow()
             self:sendGarbage(toSend)
         end
 
+        if #toClear >= 4 then
+            flashStuff()
+        end
+
+        audioManager.play("clear")
         self:clearRow(toClear)
     else
+        audioManager.play("place")
         self:checkGarbageSpawn()
     end
 end

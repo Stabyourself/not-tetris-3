@@ -1,4 +1,5 @@
 local Piece = class("Piece")
+local audioManager = require "lib.audioManager3"
 
 local Block = require "class.Block"
 

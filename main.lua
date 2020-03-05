@@ -19,6 +19,9 @@ function love.load()
     Timer = require "lib.Timer"
     local Menu = require "gamestates.menu"
     local Game_a = require "gamestates.game_A"
+    local audioManager = require "lib.audioManager3"
+
+    audioManager.load()
 
     love.graphics.setLineWidth(1/SCALE*BLOCKSCALE)
     love.physics.setMeter(METER)

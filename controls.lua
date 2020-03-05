@@ -7,8 +7,8 @@ controls[1] = baton.new({
         right = {'key:d', 'axis:leftx+', 'hat:1r', 'hat:1rd'},
         up = {'key:w', 'axis:lefty-', 'hat:1u'},
         down = {'key:s', 'axis:lefty+', 'hat:1d', 'hat:1ld', 'hat:1rd'},
-        action1 = {'key:j', 'button:2'},
-        action2 = {'key:k', 'button:1'},
+        rotate_left = {'key:j', 'button:2'},
+        rotate_right = {'key:k', 'button:1'},
         start = {'key:return', 'button:4'},
 
         debug1 = {"key:1"},
@@ -29,8 +29,8 @@ controls[2] = baton.new({
         right = {'key:right', 'axis:leftx+', 'hat:1r', 'hat:1rd'},
         up = {'key:up', 'axis:lefty-', 'hat:1u'},
         down = {'key:down', 'axis:lefty+', 'hat:1d', 'hat:1ld', 'hat:1rd'},
-        action1 = {'key:kp1', 'button:2'},
-        action2 = {'key:kp2', 'button:1'},
+        rotate_left = {'key:kp1', 'button:2'},
+        rotate_right = {'key:kp2', 'button:1'},
         start = {'key:kp5', "key:rshift", 'button:4'},
     },
     pairs = {
