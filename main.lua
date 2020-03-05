@@ -18,7 +18,7 @@ function love.load()
     class = require "middleclass"
     Timer = require "lib.Timer"
     local Menu = require "gamestates.menu"
-    local Game_a = require "gamestates.game_a"
+    local Game_a = require "gamestates.game_A"
 
     love.graphics.setLineWidth(1/SCALE*BLOCKSCALE)
     love.physics.setMeter(METER)

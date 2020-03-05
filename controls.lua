@@ -10,6 +10,7 @@ controls[1] = baton.new({
         action1 = {'key:j', 'button:2'},
         action2 = {'key:k', 'button:1'},
         start = {'key:return', 'button:4'},
+
         debug1 = {"key:1"},
         debug2 = {"key:2"},
         debug3 = {"key:3"},

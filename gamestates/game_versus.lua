@@ -1,7 +1,7 @@
 local Game = require "gamestates.Game"
 local Game_versus = class("Game_versus", Game)
 local Playfield = require "class.Playfield"
-local NESRandomizer = require "class.NESRandomizer"
+local NESRandomizer = require "class.randomizers.NESRandomizer"
 local blockGraphicPacks = require "blockGraphicsPackLoader"
 
 local backgroundImg = love.graphics.newImage("img/background_versus.png")
