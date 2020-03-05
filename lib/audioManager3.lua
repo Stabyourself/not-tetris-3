@@ -1,20 +1,20 @@
-local audioManager = {}
+local audioManager3 = {}
 
-function audioManager.load()
-    audioManager.sources = {}
+function audioManager3.load()
+    audioManager3.sources = {}
 
-    local audioList = {"clear", "move", "place", "topout", "turn"}
+    local audioList = {"clear", "move", "place", "topout", "turn", "tetris", "level"}
 
     for _, name in ipairs(audioList) do
-        audioManager.sources[name] = love.audio.newSource("audio/" .. name .. ".ogg", "static")
+        audioManager3.sources[name] = love.audio.newSource("audio/" .. name .. ".ogg", "static")
     end
 end
 
-function audioManager.play(soundName)
-    assert(audioManager.sources[soundName], string.format("Request sound %s not found.", soundName))
+function audioManager3.play(soundName)
+    assert(audioManager3.sources[soundName], string.format("Request sound %s not found.", soundName))
 
-    audioManager.sources[soundName]:stop()
-    audioManager.sources[soundName]:play()
+    audioManager3.sources[soundName]:stop()
+    audioManager3.sources[soundName]:play()
 end
 
-return audioManager
+return audioManager3

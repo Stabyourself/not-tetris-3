@@ -7,7 +7,7 @@ local flashFrame = false
 
 function love.load()
     require "variables"
-    PROF_CAPTURE = true
+    PROF_CAPTURE = false
     prof = require "lib.jprof.jprof"
     require "controls"
 

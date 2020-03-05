@@ -459,9 +459,11 @@ function Playfield:checkClearRow()
 
         if #toClear >= 4 then
             flashStuff()
+            audioManager.play("tetris")
+        else
+            audioManager.play("clear")
         end
 
-        audioManager.play("clear")
         self:clearRow(toClear)
     else
         audioManager.play("place")
