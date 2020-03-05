@@ -183,7 +183,7 @@ end
 local rayTraceResults = {left={}, right={}}
 local points = {}
 
-local function doPoint(block, previousRow, x, y, add)
+local function doPoint(block, previousRow, x, y, add, bottomY)
     local row
 
     if y == bottomY then -- prioritize above row for the bottom-most points
@@ -305,10 +305,10 @@ function Block:setSubShapes()
     block = self
     local previousRow
     for i = 1, #points, 2 do
-        previousRow = doPoint(block, previousRow, points[i], points[i+1], true)
+        previousRow = doPoint(block, previousRow, points[i], points[i+1], true, bottomY)
     end
 
-    doPoint(block, previousRow, points[1], points[2], false) -- go back to first point for the adding of the additional points on the rows
+    doPoint(block, previousRow, points[1], points[2], false, bottomY) -- go back to first point for the adding of the additional points on the rows
 
     ---------------------------------------------------
     -- all shape calculations complete at this point --

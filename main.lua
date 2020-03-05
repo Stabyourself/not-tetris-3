@@ -14,8 +14,8 @@ function love.load()
     love.graphics.setDefaultFilter("nearest", "nearest")
 
     frameDebug3 = require "class.FrameDebug3"
-    require "util"
-    class = require "middleclass"
+    require "lib.util"
+    class = require "lib.middleclass"
     Timer = require "lib.Timer"
     local Menu = require "gamestates.menu"
     local Game_a = require "gamestates.game_A"

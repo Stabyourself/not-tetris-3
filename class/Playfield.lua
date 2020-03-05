@@ -105,10 +105,14 @@ function Playfield:update(dt)
                 self.pieceEnded = false
             end
 
+            prof.push("updateLines")
+
             if self.linesUpdateBuffer > LINESUPDATEINTERVAL then
                 self:updateLines()
                 self.linesUpdateBuffer = self.linesUpdateBuffer%LINESUPDATEINTERVAL
             end
+
+            prof.pop("updateLines")
 
             self.worldUpdateBuffer = self.worldUpdateBuffer - WORLDUPDATEINTERVAL
         end
@@ -221,11 +225,7 @@ function Playfield:addArea(row, area)
     end
 end
 
-function Playfield:updateLines(dry)
-    if not dry then
-        prof.push("updateLines")
-    end
-
+function Playfield:updateLines()
     for row = 1, self.rows do
         self.area[row] = 0
     end
@@ -236,10 +236,6 @@ function Playfield:updateLines(dry)
                 block:setSubShapes()
             end
         end
-    end
-
-    if not dry then
-        prof.pop("updateLines")
     end
 end
 
