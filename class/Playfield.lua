@@ -34,12 +34,12 @@ function Playfield:initialize(game, x, y, columns, rows, player, randomizer, mir
     self.world:setCallbacks(function() end, function() end, function() end, self.postSolve)
 
     self.walls = {}
-    table.insert(self.walls, Wall:new(self.world, 0, -WALLEXTEND*PHYSICSSCALE, 0, (self.rows+WALLEXTEND)*PHYSICSSCALE, WALLFRICTION)) -- left
-    table.insert(self.walls, Wall:new(self.world, self.columns*PHYSICSSCALE, -WALLEXTEND*PHYSICSSCALE, 0, (self.rows+WALLEXTEND)*PHYSICSSCALE, WALLFRICTION)) -- right
-    table.insert(self.walls, Wall:new(self.world, 0, self.rows*PHYSICSSCALE, self.columns*PHYSICSSCALE, 0, FLOORFRICTION)) -- floor
+    self.walls.left = Wall:new(self.world, 0, -WALLEXTEND*PHYSICSSCALE, 0, (self.rows+WALLEXTEND)*PHYSICSSCALE, WALLFRICTION) -- left
+    self.walls.right = Wall:new(self.world, self.columns*PHYSICSSCALE, -WALLEXTEND*PHYSICSSCALE, 0, (self.rows+WALLEXTEND)*PHYSICSSCALE, WALLFRICTION) -- right
+    self.walls.bottom = Wall:new(self.world, 0, self.rows*PHYSICSSCALE, self.columns*PHYSICSSCALE, 0, FLOORFRICTION) -- floor
 
-    self.walls[1].dontDrop = true
-    self.walls[2].dontDrop = true
+    self.walls.left.dontDrop = true
+    self.walls.right.dontDrop = true
 
     self.worldUpdateBuffer = WORLDUPDATEINTERVAL
     self.linesUpdateBuffer = LINESUPDATEINTERVAL
@@ -54,7 +54,7 @@ function Playfield:initialize(game, x, y, columns, rows, player, randomizer, mir
     self.pieces = {}
     self:nextPiece()
 
-    self:updateLines()
+    self:updateLines(true)
 end
 
 function Playfield:update(dt)
@@ -107,7 +107,7 @@ function Playfield:update(dt)
 
             if self.linesUpdateBuffer > LINESUPDATEINTERVAL then
                 self:updateLines()
-                self.linesUpdateBuffer = self.linesUpdateBuffer - LINESUPDATEINTERVAL
+                self.linesUpdateBuffer = self.linesUpdateBuffer%LINESUPDATEINTERVAL
             end
 
             self.worldUpdateBuffer = self.worldUpdateBuffer - WORLDUPDATEINTERVAL
@@ -120,44 +120,48 @@ function Playfield:draw()
     love.graphics.translate(self.x, self.y)
 
     -- next
-    love.graphics.push()
-    love.graphics.translate(self.nextPieceX, self.nextPieceY)
+    if self.nextPieceX then
+        love.graphics.push()
+        love.graphics.translate(self.nextPieceX, self.nextPieceY)
 
-    local pieceType = pieceTypes[self.randomizer:getPiece(self.piececount+1, self.mirrored)]
-    for x = 1, #pieceType.map do
-        for y = 1, #pieceType.map[x] do
-            if pieceType.map[x][y] then
-                local rx = x-1-#pieceType.map/2
-                local ry = y-1-#pieceType.map[x]/2
+        local pieceType = pieceTypes[self.randomizer:getPiece(self.piececount+1, self.mirrored)]
+        for x = 1, #pieceType.map do
+            for y = 1, #pieceType.map[x] do
+                if pieceType.map[x][y] then
+                    local rx = x-1-#pieceType.map/2
+                    local ry = y-1-#pieceType.map[x]/2
 
-                love.graphics.draw(self:getBlockGraphic(), blockQuads[pieceType.map[x][y]], rx*BLOCKSCALE, ry*BLOCKSCALE)
+                    love.graphics.draw(self:getBlockGraphic(), blockQuads[pieceType.map[x][y]], rx*BLOCKSCALE, ry*BLOCKSCALE)
+                end
             end
         end
+
+        love.graphics.pop()
     end
 
-    love.graphics.pop()
-
     -- fullness
-    for row = 1, self.rows do
-        local x = self.areaIndicatorsX
-        local y = self.areaIndicatorsY + (row-1)*BLOCKSCALE
+    if self.areaIndicatorsX then
+        for row = 1, self.rows do
+            local x = self.areaIndicatorsX
+            local y = self.areaIndicatorsY + (row-1)*BLOCKSCALE
 
-        local mul = 0.9
+            local mul = 0.9 -- maximum width without being a clear (there's a jump to show clearing lines)
 
-        if self.area[row]/(math.floor(self.columns)*BLOCKSIZE) >= LINECLEARREQUIREMENT then
-            mul = 1
+            if self.area[row]/(math.floor(self.columns)*BLOCKSIZE) >= LINECLEARREQUIREMENT then
+                mul = 1
+            end
+
+            local factor = math.min(1, self.area[row]/(math.floor(self.columns)*BLOCKSIZE*LINECLEARREQUIREMENT))*mul
+
+            if row%2 == 0 then
+                love.graphics.setColor(LINECOLORS[2])
+            else
+                love.graphics.setColor(0, 0, 0)
+            end
+            love.graphics.rectangle("fill", x, y, math.sign(self.areaIndicatorsWidth)*BLOCKSCALE, BLOCKSCALE)
+            love.graphics.setColor(1, 1, 1)
+            love.graphics.rectangle("fill", x, y, factor*self.areaIndicatorsWidth, BLOCKSCALE)
         end
-
-        local factor = math.min(1, self.area[row]/(math.floor(self.columns)*BLOCKSIZE*LINECLEARREQUIREMENT))*mul
-
-        if row%2 == 0 then
-            love.graphics.setColor(LINECOLORS[2])
-        else
-            love.graphics.setColor(0, 0, 0)
-        end
-        love.graphics.rectangle("fill", x, y, math.sign(self.areaIndicatorsWidth)*BLOCKSCALE, BLOCKSCALE)
-        love.graphics.setColor(1, 1, 1)
-        love.graphics.rectangle("fill", x, y, factor*self.areaIndicatorsWidth, BLOCKSCALE)
     end
 
     -- overlay
@@ -217,8 +221,11 @@ function Playfield:addArea(row, area)
     end
 end
 
-function Playfield:updateLines()
-    prof.push("updateLines")
+function Playfield:updateLines(dry)
+    if not dry then
+        prof.push("updateLines")
+    end
+
     for row = 1, self.rows do
         self.area[row] = 0
     end
@@ -230,7 +237,10 @@ function Playfield:updateLines()
             end
         end
     end
-    prof.pop("updateLines")
+
+    if not dry then
+        prof.pop("updateLines")
+    end
 end
 
 function Playfield:nextPiece()
@@ -246,8 +256,10 @@ end
 function Playfield:gameOver()
     self.dead = true
     self.activePiece = false
-    self.walls[3].body:destroy()
-    self.game:topOut(self)
+    self.walls.bottom.body:destroy()
+    if self.game.topOut then
+        self.game:topOut(self)
+    end
 end
 
 function Playfield.postSolve(a, b)

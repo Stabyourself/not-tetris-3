@@ -1,10 +1,6 @@
-local Randomizer = require "class.Randomizer"
+local _Randomizer = require "class.randomizers._Randomizer"
 
-local NESRandomizer = class("NESRandomizer", Randomizer)
-
-function NESRandomizer:initialize()
-    Randomizer.initialize(self)
-end
+local NESRandomizer = class("NESRandomizer", _Randomizer)
 
 function NESRandomizer:generatePiece()
     local piece

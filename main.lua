@@ -7,7 +7,7 @@ local flashFrame = false
 
 function love.load()
     require "variables"
-    PROF_CAPTURE = false
+    PROF_CAPTURE = true
     prof = require "lib.jprof.jprof"
     require "controls"
 
@@ -31,7 +31,8 @@ function love.load()
     tileImgFlashing = love.graphics.newImage("img/border_tiled_flashing.png")
     tileImgFlashing:setWrap("repeat", "repeat")
 
-    gamestate = require("gamestates.menu"):new()
+    gamestate = require("gamestates.game_A"):new()
+    -- gamestate = require("gamestates.menu"):new()
     -- gamestate = require("gamestates.game_versus"):new()
     love.resize( love.graphics.getDimensions())
 end
@@ -68,15 +69,24 @@ function love.update(dt)
     if flashTimer and flashTimer:getTimeLeft() > 0 then
         flashFrame = not flashFrame
     end
+
+    for i = 1, #debugs do
+        if controls[1]:pressed("debug" .. i) then
+            _G[debugs[i]] = not _G[debugs[i]]
+        end
+    end
 end
 
 function love.draw()
     prof.push("draw")
 
+    local xMov = math.floor(xOffset%(8*SCALE))
+    local yMov = math.floor(yOffset%(8*SCALE))
+
     if flashFrame then
         love.graphics.draw(tileImgFlashing, tileQuad, 0, 0, 0, SCALE)
     else
-        love.graphics.draw(tileImg, tileQuad, 0, 0, 0, SCALE)
+        love.graphics.draw(tileImg, tileQuad, xMov, yMov, 0, SCALE)
     end
 
     love.graphics.push()
@@ -106,14 +116,6 @@ function love.keypressed(key)
 	if key == "escape" then
 		love.event.quit()
 	end
-
-    if key == "," then
-        debug.debug()
-    end
-
-    if key == "1" then
-        gamestate:sendGarbage(gamestate.playfields[1], 1)
-    end
 end
 
 function love.quit()
