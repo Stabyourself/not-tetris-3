@@ -78,6 +78,10 @@ function love.update(dt)
             _G[debugs[i]] = not _G[debugs[i]]
         end
     end
+
+    if controls[1]:pressed("debug7") then
+        gamestate = require("gamestates.game_A"):new()
+    end
 end
 
 function love.draw()

@@ -3,12 +3,12 @@ controls = {}
 
 controls[1] = baton.new({
     controls = {
-        left = {'key:a', 'axis:leftx-', 'hat:1l', 'hat:1ld'},
-        right = {'key:d', 'axis:leftx+', 'hat:1r', 'hat:1rd'},
-        up = {'key:w', 'axis:lefty-', 'hat:1u'},
-        down = {'key:s', 'axis:lefty+', 'hat:1d', 'hat:1ld', 'hat:1rd'},
-        rotate_left = {'key:j', 'button:2'},
-        rotate_right = {'key:k', 'button:1'},
+        left = {'key:a', "key:left", 'axis:leftx-', 'hat:1l', 'hat:1ld'},
+        right = {'key:d', "key:right", 'axis:leftx+', 'hat:1r', 'hat:1rd'},
+        up = {'key:w', "key:up", 'axis:lefty-', 'hat:1u'},
+        down = {'key:s', "key:down", 'axis:lefty+', 'hat:1d', 'hat:1ld', 'hat:1rd'},
+        rotate_left = {'key:j', "key:y", "key:z", "key:w", 'button:2'},
+        rotate_right = {'key:k', "key:x", 'button:1'},
         start = {'key:return', 'button:4'},
 
         debug1 = {"key:1"},

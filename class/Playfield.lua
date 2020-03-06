@@ -67,6 +67,7 @@ function Playfield:update(dt)
 
     -- debug stuff
     if self.player:pressed("debug6") then
+        self.lines = self.lines + 10
         self.level = self.level + 1
     end
 
