@@ -7,9 +7,15 @@ local flashFrame = false
 
 function love.load()
     require "variables"
+
+    if FIXEDRNG then
+        love.math.setRandomSeed(1)
+    end
+
     PROF_CAPTURE = false
     prof = require "lib.jprof.jprof"
     require "controls"
+    controlsLoader.loadSP()
 
     love.graphics.setDefaultFilter("nearest", "nearest")
 
@@ -36,7 +42,7 @@ function love.load()
 
     gamestate = require("gamestates.game_A"):new()
     -- gamestate = require("gamestates.menu"):new()
-    -- gamestate = require("gamestates.game_versus"):new()
+    -- gamestate = require("game7states.game_versus"):new()
     love.resize( love.graphics.getDimensions())
 end
 
@@ -58,8 +64,8 @@ function love.update(dt)
     prof.push("frame")
     prof.push("update")
 
-    for i = 1, 2 do
-        controls[i]:update()
+    for _, control in ipairs(controls) do
+        control:update()
     end
 
     dt = frameDebug3.update(dt)
@@ -81,6 +87,10 @@ function love.update(dt)
 
     if controls[1]:pressed("debug7") then
         gamestate = require("gamestates.game_A"):new()
+    end
+
+    if controls[1]:pressed("debug8") then
+        gamestate = require("gamestates.game_versus"):new()
     end
 end
 
@@ -122,7 +132,11 @@ end
 function love.keypressed(key)
 	if key == "escape" then
 		love.event.quit()
-	end
+    end
+
+    if key == "," then
+        debug.debug()
+    end
 end
 
 function love.quit()

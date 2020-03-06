@@ -11,6 +11,7 @@ function game_a:initialize()
 
     game.initialize(self)
 
+    controlsLoader.loadSP()
     table.insert(self.playfields, Playfield:new(self, 95, 41, 10.25, 20, controls[1], self.randomizer, true, blockGraphicPacks.NES))
     self.playfields[1].areaIndicatorsX = -10
 

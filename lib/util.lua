@@ -156,7 +156,7 @@ function largeenough(coords) --checks if a polygon is good enough for box2d's sn
 		local projection = (coords[i] - centroidX) * normals[i]
 				+ (coords[i + 1] - centroidY) * normals[i + 1]
 
-		if (projection < 0.04*METER) then
+		if (projection < 0.001*METER) then
 
 			return false
 

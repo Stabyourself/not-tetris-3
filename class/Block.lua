@@ -34,18 +34,17 @@ function Block:draw()
 end
 
 function Block:debugDraw()
-    -- if DEBUG_DRAWSUBSHAPES then
-    --     error("this is broken, subShapes changed")
-    --     for _, subShape in ipairs(self.subShapes) do
-    --         if subShape.row%2 == 1 then
-    --             love.graphics.setColor(1, 0, 0)
-    --         else
-    --             love.graphics.setColor(0, 1, 0)
-    --         end
+    if DEBUG_DRAWSUBSHAPES then
+        love.graphics.setColor(1, 0, 0)
 
-    --         drawLinedPolygon(subShape.shape)
-    --     end
-    -- end
+        for row, subShape in ipairs(self.subShapes) do
+            if #subShape > 0 then
+                drawLinedPolygon(subShape)
+            end
+        end
+
+        love.graphics.setColor(1, 1, 1)
+    end
 
     if DEBUG_DRAWSHAPES then
         love.graphics.setColor(0, 0, 1)
@@ -122,6 +121,7 @@ function Block:cut(rows)
             local shape = shapes[i]
 
             if not largeenough(shape) then
+                print("A shape was removed for being too small")
                 table.remove(shapes, i)
             end
         end

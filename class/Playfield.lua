@@ -55,7 +55,7 @@ function Playfield:initialize(game, x, y, columns, rows, player, randomizer, mir
     self.pieces = {}
     self:nextPiece()
 
-    self:updateLines(true)
+    self:updateLines()
 end
 
 function Playfield:update(dt)
@@ -66,9 +66,13 @@ function Playfield:update(dt)
     end
 
     -- debug stuff
-    if self.player:pressed("debug6") then
+    if self.player._controls["debug6"] and self.player:pressed("debug6") then
         self.lines = self.lines + 10
         self.level = self.level + 1
+    end
+
+    if self.player._controls["debug9"] and self.player:pressed("debug9") then
+        self:receiveGarbage(40)
     end
 
     self.worldUpdateBuffer = self.worldUpdateBuffer + dt
@@ -424,6 +428,7 @@ function Playfield:clearRow(rows)
             self.pieces[i]:cut(rows)
         end
         self.paused = false
+        self:updateLines()
         self:checkGarbageSpawn()
     end, LINECLEARTIME)
 end

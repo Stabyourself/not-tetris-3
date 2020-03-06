@@ -1,4 +1,4 @@
-local Game = require "gamestates.Game"
+local Game = require "gamestates.game"
 local Game_versus = class("Game_versus", Game)
 local Playfield = require "class.Playfield"
 local NESRandomizer = require "class.randomizers.NESRandomizer"
@@ -11,6 +11,7 @@ function Game_versus:initialize()
 
     self.randomizer = NESRandomizer:new()
 
+    controlsLoader.loadMP()
     table.insert(self.playfields, Playfield:new(self, 15, 38, 10.25, 20, controls[1], self.randomizer, false, blockGraphicPacks.NES))
     table.insert(self.playfields, Playfield:new(self, 159, 38, 10.25, 20, controls[2], self.randomizer, true, blockGraphicPacks.NES))
 
