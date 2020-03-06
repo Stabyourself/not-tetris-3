@@ -3,7 +3,8 @@ yOffset = 0
 
 local tileImg
 local tileImgFlashing
-local flashFrame = false
+local flashFrame = 0
+local flashBackground = false
 
 function love.load()
     require "variables"
@@ -76,7 +77,13 @@ function love.update(dt)
     prof.pop("update")
 
     if flashTimer and flashTimer:getTimeLeft() > 0 then
-        flashFrame = not flashFrame
+        local flashCycle = flashTimer:getTimeLeft()%(flashOnTime+flashOffTime)
+
+        if flashCycle < flashOnTime then
+            flashBackground = true
+        else
+            flashBackground = false
+        end
     end
 
     for i = 1, #debugs do
@@ -100,7 +107,7 @@ function love.draw()
     local xMov = math.floor(xOffset%(8*SCALE))
     local yMov = math.floor(yOffset%(8*SCALE))
 
-    if flashFrame then
+    if flashBackground then
         love.graphics.draw(tileImgFlashing, tileQuad, 0, 0, 0, SCALE)
     else
         love.graphics.draw(tileImg, tileQuad, xMov, yMov, 0, SCALE)
@@ -126,7 +133,7 @@ function love.draw()
 end
 
 function flashStuff()
-    flashTimer = Timer.setTimer(function() flashFrame = false end, 0.5)
+    flashTimer = Timer.setTimer(function() flashBackground = false end, LINECLEARTIME)
 end
 
 function love.keypressed(key)
