@@ -16,6 +16,10 @@ controls[1] = baton.new({
         debug3 = {"key:3"},
         debug4 = {"key:4"},
         debug5 = {"key:5"},
+        debug6 = {"key:6"},
+        debug7 = {"key:7"},
+        debug8 = {"key:8"},
+        debug9 = {"key:9"},
     },
     pairs = {
         move = {'left', 'right', 'up', 'down'}

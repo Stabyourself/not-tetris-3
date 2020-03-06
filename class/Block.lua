@@ -34,18 +34,18 @@ function Block:draw()
 end
 
 function Block:debugDraw()
-    if DEBUG_DRAWSUBSHAPES then
-        error("this is broken, subShapes changed")
-        for _, subShape in ipairs(self.subShapes) do
-            if subShape.row%2 == 1 then
-                love.graphics.setColor(1, 0, 0)
-            else
-                love.graphics.setColor(0, 1, 0)
-            end
+    -- if DEBUG_DRAWSUBSHAPES then
+    --     error("this is broken, subShapes changed")
+    --     for _, subShape in ipairs(self.subShapes) do
+    --         if subShape.row%2 == 1 then
+    --             love.graphics.setColor(1, 0, 0)
+    --         else
+    --             love.graphics.setColor(0, 1, 0)
+    --         end
 
-            drawLinedPolygon(subShape.shape)
-        end
-    end
+    --         drawLinedPolygon(subShape.shape)
+    --     end
+    -- end
 
     if DEBUG_DRAWSHAPES then
         love.graphics.setColor(0, 0, 1)
@@ -55,12 +55,12 @@ function Block:debugDraw()
         love.graphics.setColor(1, 1, 1)
     end
 
-    if DEBUG_DRAWSUBSHAPEROW then
-        error("broken, see above")
-        for _, subShape in ipairs(self.subShapes) do
-            love.graphics.print(subShape.row, subShape.shape[1], subShape.shape[2])
-        end
-    end
+    -- if DEBUG_DRAWSUBSHAPEROW then
+    --     error("broken, see above")
+    --     for _, subShape in ipairs(self.subShapes) do
+    --         love.graphics.print(subShape.row, subShape.shape[1], subShape.shape[2])
+    --     end
+    -- end
 
     if DEBUG_DRAWSHAPEVERTICES then
         love.graphics.setColor(1, 0, 0)

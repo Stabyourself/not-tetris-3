@@ -13,7 +13,7 @@ function Piece:initialize(playfield)
     self.body:setAngle(0)
     -- self.body:setBullet(true)
 
-    self.body:setLinearVelocity(0, MAXSPEEDY)
+    self.body:setLinearVelocity(0, self.playfield:getMaxSpeedY())
     self.active = true
 end
 
@@ -40,17 +40,10 @@ end
 function Piece.fromShapes(playfield, shapes)
     local piece = Piece:new(playfield)
 
-    if not shapes[1] then
+    for _, shape in ipairs(shapes) do
         local b2shape = love.physics.newPolygonShape(shape.shape)
         local block = Block:new(piece, b2shape, shape.x, shape.y, shape.img, shape.quadI)
         table.insert(piece.blocks, block)
-
-    else
-        for _, shape in ipairs(shapes) do
-            local b2shape = love.physics.newPolygonShape(shape.shape)
-            local block = Block:new(piece, b2shape, shape.x, shape.y, shape.img, shape.quadI)
-            table.insert(piece.blocks, block)
-        end
     end
 
     return piece
@@ -59,8 +52,8 @@ end
 function Piece:limitDownwardVelocity()
     local speedX, speedY = self.body:getLinearVelocity()
 
-    if speedY > MAXSPEEDY then
-        self.body:setLinearVelocity(speedX, MAXSPEEDY)
+    if speedY > self.playfield:getMaxSpeedY() then
+        self.body:setLinearVelocity(speedX, self.playfield:getMaxSpeedY())
     end
 end
 

@@ -61,78 +61,87 @@ end
 function Playfield:update(dt)
     updateGroup(self.clearAnimations, dt)
 
-    if not self.paused then
-        self.worldUpdateBuffer = self.worldUpdateBuffer + dt
-        self.linesUpdateBuffer = self.linesUpdateBuffer + dt
+    if self.paused then
+        return
+    end
 
-        -- world is updated in fixed steps to prevent fps-dependency (box2d behaves differently with different deltas, even if the total is the same)
-        while self.worldUpdateBuffer >= WORLDUPDATEINTERVAL do
-            if self.spawnNewPieceNextFrame then
-                -- check if we have garbage to spawn
-                self:nextPiece()
-                self.spawnNewPieceNextFrame = false
-            end
+    -- debug stuff
+    if self.player:pressed("debug6") then
+        self.level = self.level + 1
+    end
 
-            -- Movement
-            if self.activePiece then
-                -- Rotation
-                if self.player:down("rotate_left") then
-                    self.activePiece:rotate(-1)
+    self.worldUpdateBuffer = self.worldUpdateBuffer + dt
+    self.linesUpdateBuffer = self.linesUpdateBuffer + dt
 
-                    if self.player:pressed("rotate_left") then
-                        audioManager.play("turn")
-                    end
-                end
-
-                if self.player:down("rotate_right") then
-                    self.activePiece:rotate(1)
-
-                    if self.player:pressed("rotate_right") then
-                        audioManager.play("turn")
-                    end
-                end
-
-                -- Horizontal movement
-                if self.player:down("left") then
-                    self.activePiece:move(-1)
-
-                    if self.player:pressed("left") then
-                        audioManager.play("move")
-                    end
-                end
-
-                if self.player:down("right") then
-                    self.activePiece:move(1)
-
-                    if self.player:pressed("right") then
-                        audioManager.play("move")
-                    end
-                end
-
-                -- vertical movement
-                if not self.player:down("down") then
-                    self.activePiece:limitDownwardVelocity()
-                end
-            end
-
-            self.world:update(WORLDUPDATEINTERVAL)
-
-            if self.pieceEnded then
-                self:checkClearRow()
-                self.pieceEnded = false
-            end
-
-            prof.push("updateLines")
-
-            if self.linesUpdateBuffer > LINESUPDATEINTERVAL then
-                self:updateLines()
-                self.linesUpdateBuffer = self.linesUpdateBuffer%LINESUPDATEINTERVAL
-            end
-
-            prof.pop("updateLines")
-
-            self.worldUpdateBuffer = self.worldUpdateBuffer - WORLDUPDATEINTERVAL
+    -- world is updated in fixed steps to prevent fps-dependency (box2d behaves differently with different deltas, even if the total is the same)
+    while self.worldUpdateBuffer >= WORLDUPDATEINTERVAL do
+        if self.spawnNewPieceNextFrame then
+            -- check if we have garbage to spawn
+            self:nextPiece()
+            self.spawnNewPieceNextFrame = false
         end
+
+        -- Movement
+        if self.activePiece then
+            -- Rotation
+            if self.player:down("rotate_left") then
+                self.activePiece:rotate(-1)
+
+                if self.player:pressed("rotate_left") then
+                    audioManager.play("turn")
+                end
+            end
+
+            if self.player:down("rotate_right") then
+                self.activePiece:rotate(1)
+
+                if self.player:pressed("rotate_right") then
+                    audioManager.play("turn")
+                end
+            end
+
+            -- Horizontal movement
+            if self.player:down("left") then
+                self.activePiece:move(-1)
+
+                if self.player:pressed("left") then
+                    audioManager.play("move")
+                end
+            end
+
+            if self.player:down("right") then
+                self.activePiece:move(1)
+
+                if self.player:pressed("right") then
+                    audioManager.play("move")
+                end
+            end
+
+            -- vertical movement
+            if not self.player:down("down") then
+                self.activePiece:limitDownwardVelocity()
+            end
+        end
+
+        self.world:update(WORLDUPDATEINTERVAL)
+
+        if self.pieceEnded then
+            self:checkClearRow()
+            self.pieceEnded = false
+        end
+
+        prof.push("updateLines")
+
+        if self.linesUpdateBuffer > LINESUPDATEINTERVAL then
+            self:updateLines()
+
+            -- modulu because we don't care if this is skipped due to high dt; we only care about the latest state
+            self.linesUpdateBuffer = self.linesUpdateBuffer%LINESUPDATEINTERVAL
+        end
+
+        prof.pop("updateLines")
+
+        self.worldUpdateBuffer = self.worldUpdateBuffer - WORLDUPDATEINTERVAL
     end
 end
 
@@ -234,6 +243,10 @@ end
 
 function Playfield:getBlockGraphic()
     return self.blockGraphicsPack:getGraphic(self.level)
+end
+
+function Playfield:getMaxSpeedY()
+    return MAXSPEEDYBASE + MAXSPEEDYPERLEVEL*self.level
 end
 
 function Playfield:addArea(row, area)
