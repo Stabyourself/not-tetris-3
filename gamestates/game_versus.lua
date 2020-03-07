@@ -82,7 +82,7 @@ function Game_versus:topOut(playfield)
         Timer.setTimer(function()
             self.showWinner = true
             Timer.setTimer(function()
-                gamestate = require("gamestates.menu"):new()
+                gamestate.switch(require("gamestates.menu"):new())
             end, 4)
         end, 2)
     end

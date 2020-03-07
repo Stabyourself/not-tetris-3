@@ -30,7 +30,7 @@ function FrameDebug3.update(dt)
 
             return advanceDT*mul
         else
-            return false
+            return 0
         end
     end
 

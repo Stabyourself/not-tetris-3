@@ -1,9 +1,7 @@
 xOffset = 0
 yOffset = 0
 
-local flashFrame = 0
-local flashBackground = false
-local gamestate = require "lib.gamestate"
+gamestate = require "lib.gamestate"
 
 function love.load()
     require "variables"
@@ -24,13 +22,11 @@ function love.load()
     frameDebug3 = require "class.FrameDebug3"
     require "lib.util"
     Timer = require "lib.Timer"
-    local Menu = require "gamestates.menu"
-    local Game_a = require "gamestates.game_A"
     local audioManager = require "lib.audioManager3"
 
     preDraw = require "gamestates.preDraw"
     postDraw = require "gamestates.postDraw"
-    backgroundState = require("gamestates.background"):new()
+    background = require("gamestates.background"):new()
 
     audioManager.load()
 
@@ -55,11 +51,11 @@ function love.resize(w, h)
     xOffset = math.ceil(((w-SCALE*WIDTH)/2)/SCALE)*SCALE
     yOffset = math.ceil(((h-SCALE*HEIGHT)/2)/SCALE)*SCALE
 
-    backgroundState:resize(w, h)
+    background:resize(w, h)
 end
 
 function love.draw()
-    backgroundState:draw()
+    background:draw()
     preDraw:draw()
 
     gamestate.current():draw()
@@ -78,7 +74,7 @@ function love.update(dt)
     dt = frameDebug3.update(dt)
 
     gamestate.current():update(dt)
-    backgroundState:update(dt)
+    background:update(dt)
 
     Timer.managedUpdate(dt)
 
@@ -106,6 +102,14 @@ function love.keypressed(key)
 
     if key == "," then
         debug.debug()
+    end
+
+    if key == "#" then
+        frameDebug3.frameAdvance()
+    end
+
+    if key == "pause" then
+        frameDebug3.pausePlay()
     end
 end
 
