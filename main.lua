@@ -1,10 +1,9 @@
 xOffset = 0
 yOffset = 0
 
-local tileImg
-local tileImgFlashing
 local flashFrame = 0
 local flashBackground = false
+local gamestate = require "lib.gamestate"
 
 function love.load()
     require "variables"
@@ -20,13 +19,18 @@ function love.load()
 
     love.graphics.setDefaultFilter("nearest", "nearest")
 
+
+    class = require "lib.middleclass"
     frameDebug3 = require "class.FrameDebug3"
     require "lib.util"
-    class = require "lib.middleclass"
     Timer = require "lib.Timer"
     local Menu = require "gamestates.menu"
     local Game_a = require "gamestates.game_A"
     local audioManager = require "lib.audioManager3"
+
+    preDraw = require "gamestates.preDraw"
+    postDraw = require "gamestates.postDraw"
+    backgroundState = require("gamestates.background"):new()
 
     audioManager.load()
 
@@ -36,29 +40,31 @@ function love.load()
     local font = love.graphics.newImageFont("img/font.png", "0123456789abcdefghijklmnopqrstuvwxyz.:/,\"C-_A* !{}?'()+=><#@")
     love.graphics.setFont(font)
 
-    tileImg = love.graphics.newImage("img/border_tiled.png")
-    tileImg:setWrap("repeat", "repeat")
-    tileImgFlashing = love.graphics.newImage("img/border_tiled_flashing.png")
-    tileImgFlashing:setWrap("repeat", "repeat")
+    gamestate.switch(require("gamestates.game_A"):new())
 
-    gamestate = require("gamestates.game_A"):new()
-    -- gamestate = require("gamestates.menu"):new()
-    -- gamestate = require("game7states.game_versus"):new()
-    love.resize( love.graphics.getDimensions())
+    love.resize(love.graphics.getDimensions())
 end
 
-function love.resize( w, h )
+function love.resize(w, h)
     local maxScale = math.min(w/WIDTH, h/HEIGHT)
 
     local scale = math.floor(maxScale)
-
 
     SCALE = scale
 
     xOffset = math.ceil(((w-SCALE*WIDTH)/2)/SCALE)*SCALE
     yOffset = math.ceil(((h-SCALE*HEIGHT)/2)/SCALE)*SCALE
 
-    tileQuad = love.graphics.newQuad(8, 0, w, h, 64, 64)
+    backgroundState:resize(w, h)
+end
+
+function love.draw()
+    backgroundState:draw()
+    preDraw:draw()
+
+    gamestate.current():draw()
+
+    postDraw:draw()
 end
 
 function love.update(dt)
@@ -71,20 +77,12 @@ function love.update(dt)
 
     dt = frameDebug3.update(dt)
 
-    gamestate:update(dt)
+    gamestate.current():update(dt)
+    backgroundState:update(dt)
+
     Timer.managedUpdate(dt)
 
     prof.pop("update")
-
-    if flashTimer and flashTimer:getTimeLeft() > 0 then
-        local flashCycle = flashTimer:getTimeLeft()%(flashOnTime+flashOffTime)
-
-        if flashCycle < flashOnTime then
-            flashBackground = true
-        else
-            flashBackground = false
-        end
-    end
 
     for i = 1, #debugs do
         if controls[1]:pressed("debug" .. i) then
@@ -93,47 +91,12 @@ function love.update(dt)
     end
 
     if controls[1]:pressed("debug7") then
-        gamestate = require("gamestates.game_A"):new()
+        gamestate.switch(require("gamestates.game_A"):new())
     end
 
     if controls[1]:pressed("debug8") then
-        gamestate = require("gamestates.game_versus"):new()
+        gamestate.switch(require("gamestates.game_versus"):new())
     end
-end
-
-function love.draw()
-    prof.push("draw")
-
-    local xMov = math.floor(xOffset%(8*SCALE))
-    local yMov = math.floor(yOffset%(8*SCALE))
-
-    if flashBackground then
-        love.graphics.draw(tileImgFlashing, tileQuad, 0, 0, 0, SCALE)
-    else
-        love.graphics.draw(tileImg, tileQuad, xMov, yMov, 0, SCALE)
-    end
-
-    love.graphics.push()
-    love.graphics.translate(xOffset, yOffset)
-    love.graphics.scale(SCALE, SCALE)
-
-    gamestate:draw()
-
-    love.graphics.pop()
-
-    love.graphics.push()
-    love.graphics.scale(SCALE, SCALE)
-
-    love.graphics.print("fps: " .. love.timer.getFPS())
-    love.graphics.pop()
-
-	prof.pop("draw")
-
-	prof.pop("frame")
-end
-
-function flashStuff()
-    flashTimer = Timer.setTimer(function() flashBackground = false end, LINECLEARTIME)
 end
 
 function love.keypressed(key)

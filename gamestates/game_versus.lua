@@ -6,8 +6,8 @@ local blockGraphicPacks = require "blockGraphicsPackLoader"
 
 local backgroundImg = love.graphics.newImage("img/background_versus.png")
 
-function Game_versus:initialize()
-    Game.initialize(self)
+function Game_versus:enter()
+    Game.init(self)
 
     self.randomizer = NESRandomizer:new()
 

@@ -6,10 +6,10 @@ local blockGraphicPacks = require "blockGraphicsPackLoader"
 
 local backgroundImg = love.graphics.newImage("img/background.png")
 
-function game_a:initialize()
+function game_a:enter()
     self.randomizer = NESRandomizer:new()
 
-    game.initialize(self)
+    game.init(self)
 
     controlsLoader.loadSP()
     table.insert(self.playfields, Playfield:new(self, 95, 41, 10.25, 20, controls[1], self.randomizer, true, blockGraphicPacks.NES))

@@ -1,20 +1,19 @@
-local Game = class("Game")
+local game = class("Game")
 
-function Game:initialize()
+function game:init()
     self.playfields = {}
 end
 
-function Game:update(dt)
+function game:update(dt)
     updateGroup(self.playfields, dt)
 end
 
-function Game:draw()
+function game:draw()
     for _, playfield in ipairs(self.playfields) do
         playfield:draw()
     end
 end
 
-function Game:sendGarbage(toPly, count)
-end
+function game:sendGarbage(toPly, count) end
 
-return Game
+return game
