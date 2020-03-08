@@ -11,19 +11,13 @@ function controlsLoader.loadSP()
             right = {'key:d', "key:right", 'axis:leftx+', 'hat:1r', 'hat:1rd'},
             up = {'key:w', "key:up", 'axis:lefty-', 'hat:1u'},
             down = {'key:s', "key:down", 'axis:lefty+', 'hat:1d', 'hat:1ld', 'hat:1rd'},
+
             rotate_left = {'key:j', "key:y", "key:z", "key:w", 'button:2'},
             rotate_right = {'key:k', "key:x", 'button:1'},
-            start = {'key:return', 'button:4'},
 
-            debug1 = {"key:1"},
-            debug2 = {"key:2"},
-            debug3 = {"key:3"},
-            debug4 = {"key:4"},
-            debug5 = {"key:5"},
-            debug6 = {"key:6"},
-            debug7 = {"key:7"},
-            debug8 = {"key:8"},
-            debug9 = {"key:9"},
+            start = {'key:return', 'button:4'},
+            pause = {'key:return'},
+            quit = {'key:escape'},
         },
         pairs = {
             move = {'left', 'right', 'up', 'down'}
@@ -44,16 +38,6 @@ function controlsLoader.loadMP()
             rotate_left = {'key:j', 'button:2'},
             rotate_right = {'key:k', 'button:1'},
             start = {'key:return', 'button:4'},
-
-            debug1 = {"key:1"},
-            debug2 = {"key:2"},
-            debug3 = {"key:3"},
-            debug4 = {"key:4"},
-            debug5 = {"key:5"},
-            debug6 = {"key:6"},
-            debug7 = {"key:7"},
-            debug8 = {"key:8"},
-            debug9 = {"key:9"},
         },
         pairs = {
             move = {'left', 'right', 'up', 'down'}

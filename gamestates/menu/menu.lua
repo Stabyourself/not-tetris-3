@@ -64,7 +64,7 @@ press start on both players]], 0, 80, WIDTH, "center")
 end
 
 function Menu:startGame()
-    gamestate.switch(require("gamestates.game_versus"):new())
+    gamestate.switch(require("gamestates.game.versus"):new())
 end
 
 return Menu

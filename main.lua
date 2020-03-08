@@ -40,7 +40,7 @@ function love.load()
     love.resize(love.graphics.getDimensions())
 
 
-    gamestate.switch(require("gamestates.game_A"):new())
+    gamestate.switch(require("gamestates.game.type_a"):new())
 end
 
 function love.resize(w, h)

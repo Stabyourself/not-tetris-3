@@ -1,4 +1,4 @@
-local Game = require "gamestates.game"
+local Game = require "gamestates.game._game"
 local Game_versus = class("Game_versus", Game)
 local Playfield = require "class.tetris.Playfield"
 local NESRandomizer = require "class.tetris.randomizers.NESRandomizer"
