@@ -54,13 +54,6 @@ function Block:debugDraw()
         love.graphics.setColor(1, 1, 1)
     end
 
-    -- if DEBUG_DRAWSUBSHAPEROW then
-    --     error("broken, see above")
-    --     for _, subShape in ipairs(self.subShapes) do
-    --         love.graphics.print(subShape.row, subShape.shape[1], subShape.shape[2])
-    --     end
-    -- end
-
     if DEBUG_DRAWSHAPEVERTICES then
         love.graphics.setColor(1, 0, 0)
         local points = {self.shape:getPoints()}

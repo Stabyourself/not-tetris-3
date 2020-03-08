@@ -2,6 +2,9 @@ xOffset = 0
 yOffset = 0
 
 gamestate = require "lib.gamestate"
+class = require "lib.middleclass"
+frameDebug3 = require "lib.FrameDebug3"
+Timer = require "lib.Timer"
 
 function love.load()
     require "variables"
@@ -12,30 +15,32 @@ function love.load()
 
     love.graphics.setDefaultFilter("nearest", "nearest")
 
-    class = require "lib.middleclass"
-    frameDebug3 = require "lib.FrameDebug3"
+
+
     require "lib.util"
-    Timer = require "lib.Timer"
+
+
     local audioManager = require "lib.audioManager3"
+    audioManager.load()
 
     require "controls"
     controlsLoader.loadSP()
 
-    preDraw = require "gamestates.preDraw"
-    postDraw = require "gamestates.postDraw"
-    background = require("gamestates.background"):new()
-
-    audioManager.load()
 
     love.graphics.setLineWidth(1/SCALE*BLOCKSCALE)
     love.physics.setMeter(METER)
 
+    preDraw = require("gamestates.preDraw"):new()
+    postDraw = require("gamestates.postDraw"):new()
+    background = require("gamestates.background"):new()
+
     local font = love.graphics.newImageFont("img/font.png", [[0123456789abcdefghijklmnopqrstuvwxyz.:/,"C-_A* !{}?'()+=><#@]])
     love.graphics.setFont(font)
 
-    gamestate.switch(require("gamestates.game_A"):new())
-
     love.resize(love.graphics.getDimensions())
+
+
+    gamestate.switch(require("gamestates.game_A"):new())
 end
 
 function love.resize(w, h)
@@ -61,33 +66,19 @@ function love.draw()
 end
 
 function love.update(dt)
+    dt = frameDebug3.update(dt)
+
     for _, control in ipairs(controls) do
         control:update()
     end
 
-    dt = frameDebug3.update(dt)
-
-    gamestate.current():update(dt)
-    background:update(dt)
-
     Timer.managedUpdate(dt)
-
-    for i = 1, #debugs do
-        if controls[1]:pressed("debug" .. i) then
-            _G[debugs[i]] = not _G[debugs[i]]
-        end
-    end
-
-    if controls[1]:pressed("debug7") then
-        gamestate.switch(require("gamestates.game_A"):new())
-    end
-
-    if controls[1]:pressed("debug8") then
-        gamestate.switch(require("gamestates.game_versus"):new())
-    end
+    background:update(dt)
+    gamestate.current():update(dt)
 end
 
 function love.keypressed(key)
+    -- just debug stuff!
 	if key == "escape" then
 		love.event.quit()
     end
