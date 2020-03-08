@@ -135,16 +135,12 @@ function Playfield:update(dt)
             self.pieceEnded = false
         end
 
-        prof.push("updateLines")
-
         if self.linesUpdateBuffer > LINESUPDATEINTERVAL then
             self:updateLines()
 
             -- modulu because we don't care if this is skipped due to high dt; we only care about the latest state
             self.linesUpdateBuffer = self.linesUpdateBuffer%LINESUPDATEINTERVAL
         end
-
-        prof.pop("updateLines")
 
         self.worldUpdateBuffer = self.worldUpdateBuffer - WORLDUPDATEINTERVAL
     end
@@ -212,11 +208,9 @@ function Playfield:draw()
 
     love.graphics.setScissor(self.x*SCALE+xOffset, self.y*SCALE+yOffset, self.columns*BLOCKSCALE*SCALE, self.rows*BLOCKSCALE*SCALE)
 
-    prof.push("pieces")
     for _, v in ipairs(self.pieces) do
         v:draw()
     end
-    prof.pop("pieces")
 
     -- line clear animation
     for _, clearAnimation in ipairs(self.clearAnimations) do

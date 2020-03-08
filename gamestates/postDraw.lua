@@ -8,8 +8,6 @@ function postDraw:draw()
 
     love.graphics.print("fps: " .. love.timer.getFPS())
     love.graphics.pop()
-	prof.pop("draw")
-	prof.pop("frame")
 end
 
 return postDraw

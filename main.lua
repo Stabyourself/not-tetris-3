@@ -10,9 +10,6 @@ function love.load()
         love.math.setRandomSeed(1)
     end
 
-    PROF_CAPTURE = false
-    prof = require "lib.jprof.jprof"
-
     love.graphics.setDefaultFilter("nearest", "nearest")
 
     class = require "lib.middleclass"
@@ -64,9 +61,6 @@ function love.draw()
 end
 
 function love.update(dt)
-    prof.push("frame")
-    prof.push("update")
-
     for _, control in ipairs(controls) do
         control:update()
     end
@@ -77,8 +71,6 @@ function love.update(dt)
     background:update(dt)
 
     Timer.managedUpdate(dt)
-
-    prof.pop("update")
 
     for i = 1, #debugs do
         if controls[1]:pressed("debug" .. i) then
@@ -111,8 +103,4 @@ function love.keypressed(key)
     if key == "pause" then
         frameDebug3.pausePlay()
     end
-end
-
-function love.quit()
-    prof.write("lastrun.mpack")
 end
