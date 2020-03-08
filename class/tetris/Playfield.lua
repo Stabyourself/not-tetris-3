@@ -1,10 +1,10 @@
 local Playfield = class("Playfield")
 
 local Wall = require "class.Wall"
-local pieceTypes = require "class.PieceType"
-local Piece = require "class.Piece"
-local ClearAnimation = require "class.ClearAnimation"
-local pieceTypes = require "class.PieceType"
+local pieceTypes = require "class.tetris.PieceType"
+local Piece = require "class.tetris.Piece"
+local ClearAnimation = require "class.tetris.ClearAnimation"
+local pieceTypes = require "class.tetris.PieceType"
 local audioManager = require "lib.audioManager3"
 
 local blockQuads = {}

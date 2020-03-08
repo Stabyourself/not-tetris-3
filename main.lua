@@ -12,17 +12,17 @@ function love.load()
 
     PROF_CAPTURE = false
     prof = require "lib.jprof.jprof"
-    require "controls"
-    controlsLoader.loadSP()
 
     love.graphics.setDefaultFilter("nearest", "nearest")
 
-
     class = require "lib.middleclass"
-    frameDebug3 = require "class.FrameDebug3"
+    frameDebug3 = require "lib.FrameDebug3"
     require "lib.util"
     Timer = require "lib.Timer"
     local audioManager = require "lib.audioManager3"
+
+    require "controls"
+    controlsLoader.loadSP()
 
     preDraw = require "gamestates.preDraw"
     postDraw = require "gamestates.postDraw"
@@ -33,7 +33,7 @@ function love.load()
     love.graphics.setLineWidth(1/SCALE*BLOCKSCALE)
     love.physics.setMeter(METER)
 
-    local font = love.graphics.newImageFont("img/font.png", "0123456789abcdefghijklmnopqrstuvwxyz.:/,\"C-_A* !{}?'()+=><#@")
+    local font = love.graphics.newImageFont("img/font.png", [[0123456789abcdefghijklmnopqrstuvwxyz.:/,"C-_A* !{}?'()+=><#@]])
     love.graphics.setFont(font)
 
     gamestate.switch(require("gamestates.game_A"):new())

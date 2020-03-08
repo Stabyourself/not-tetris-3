@@ -1,6 +1,6 @@
 local game = require "gamestates.game"
 local game_a = class("game_a", game)
-local Playfield = require "class.Playfield"
+local Playfield = require "class.tetris.Playfield"
 local NESRandomizer = require "class.randomizers.NESRandomizer"
 local blockGraphicPacks = require "blockGraphicsPackLoader"
 
