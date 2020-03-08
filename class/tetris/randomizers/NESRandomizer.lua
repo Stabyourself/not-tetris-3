@@ -1,4 +1,4 @@
-local _Randomizer = require "class.randomizers._Randomizer"
+local _Randomizer = require "class.tetris.randomizers._Randomizer"
 
 local NESRandomizer = class("NESRandomizer", _Randomizer)
 
