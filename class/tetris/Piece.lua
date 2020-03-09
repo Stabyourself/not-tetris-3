@@ -67,6 +67,10 @@ function Piece:draw()
         block:draw()
     end
 
+    for _, block in ipairs(self.blocks) do
+        block:debugDraw()
+    end
+
     love.graphics.setColor(1, 1, 1)
 
     love.graphics.pop()

@@ -10,7 +10,7 @@ function love.load()
     require "variables"
 
     if FIXEDRNG then
-        love.math.setRandomSeed(1)
+        love.math.setRandomSeed(2)
     end
 
     love.graphics.setDefaultFilter("nearest", "nearest")
@@ -27,7 +27,7 @@ function love.load()
     controlsLoader.loadSP()
 
 
-    love.graphics.setLineWidth(1/SCALE*BLOCKSCALE)
+    love.graphics.setLineWidth(1/SCALE)
     love.physics.setMeter(METER)
 
     preDraw = require("gamestates.preDraw"):new()

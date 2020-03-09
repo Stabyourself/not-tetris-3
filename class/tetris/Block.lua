@@ -29,8 +29,6 @@ function Block:draw()
 
         love.graphics.pop()
     end
-
-    self:debugDraw()
 end
 
 function Block:debugDraw()
@@ -45,6 +43,19 @@ function Block:debugDraw()
 
         love.graphics.setColor(1, 1, 1)
     end
+
+    if DEBUG_DRAWSUBSHAPEROWS then
+        love.graphics.setColor(0, 1, 0)
+
+        for row, subShape in ipairs(self.subShapes) do
+            if #subShape > 0 then
+                love.graphics.print(row, subShape[1], subShape[2])
+            end
+        end
+
+        love.graphics.setColor(1, 1, 1)
+    end
+
 
     if DEBUG_DRAWSHAPES then
         love.graphics.setColor(0, 0, 1)
@@ -144,13 +155,14 @@ function Block:cut(rows)
 
                 table.remove(shapes[i], shortestI)
                 table.remove(shapes[i], shortestI)
+                print("Removed a vertex cuz too many")
             end
         end
 
         for i = #shapes, 2, -1 do
             if #shapes[i] >= 6 then
                 local shape = love.physics.newPolygonShape(shapes[i])
-                table.insert(self.piece.blocks, Block:new(self.piece, shape, self.x, self.y, self.quad, self.quadI))
+                table.insert(self.piece.blocks, Block:new(self.piece, shape, self.x, self.y, self.img, self.quadI))
 
             else
                 print("Prevented a crash during Block cutting creation.")
@@ -288,20 +300,16 @@ function Block:setSubShapes()
         rayTraceResults.right[row] = hitx
     end
 
-    local previousRow = false
-
     for row, subShape in pairs(self.subShapes) do
         iclearTable(self.subShapes[row])
     end
 
-
-    block = self
-    local previousRow
+    local previousRow = false
     for i = 1, #points, 2 do
-        previousRow = doPoint(block, previousRow, points[i], points[i+1], true, bottomY)
+        previousRow = doPoint(self, previousRow, points[i], points[i+1], true, bottomY)
     end
 
-    doPoint(block, previousRow, points[1], points[2], false, bottomY) -- go back to first point for the adding of the additional points on the rows
+    doPoint(self, previousRow, points[1], points[2], false, bottomY) -- go back to first point for the adding of the additional points on the rows
 
     ---------------------------------------------------
     -- all shape calculations complete at this point --
