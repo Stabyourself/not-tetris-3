@@ -247,6 +247,10 @@ function combineShapes(shapes)
 		end
 	end
 
+	for _, shape in ipairs(shapes) do
+		shape.traversed = nil
+	end
+
 	return newShapes
 end
 
