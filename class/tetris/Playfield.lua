@@ -260,11 +260,11 @@ function Playfield:updateLines()
     end
 
     for _, piece in ipairs(self.pieces) do
-        if piece ~= self.activePiece then -- don't include the active piece?
+        -- if piece ~= self.activePiece then -- don't include the active piece?
             for _, block in ipairs(piece.blocks) do
                 block:setSubShapes()
             end
-        end
+        -- end
     end
 end
 
