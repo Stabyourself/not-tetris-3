@@ -40,6 +40,7 @@ function love.load()
     preDraw = require("gamestates.preDraw"):new(camera) -- is this? I honestly don't know lmao
     postDraw = require("gamestates.postDraw"):new(camera)
     background = require("gamestates.background"):new(camera)
+    BACKGROUND = background -- this'll have to do for now.
 
     -- let everything adjust to the window before we start
     love.resize(love.graphics.getDimensions())
