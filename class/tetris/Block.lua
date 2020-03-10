@@ -37,7 +37,7 @@ function Block:debugDraw()
 
         for row, subShape in ipairs(self.subShapes) do
             if #subShape > 0 then
-                drawLinedPolygon(subShape)
+                util.drawLinedPolygon(subShape)
             end
         end
 
@@ -60,7 +60,7 @@ function Block:debugDraw()
     if DEBUG_DRAWSHAPES then
         love.graphics.setColor(0, 0, 1)
 
-        drawLinedPolygon({self.shape:getPoints()})
+        util.drawLinedPolygon({self.shape:getPoints()})
 
         love.graphics.setColor(1, 1, 1)
     end
@@ -77,9 +77,9 @@ local meshPoints = {}
 local shapePoints = {}
 --- Updates the mesh used for drawing the block, based on the physical shape
 function Block:setMesh()
-    setPointTable(shapePoints, self.shape:getPoints())
+    util.setPointTable(shapePoints, self.shape:getPoints())
 
-    iclearTable(meshPoints)
+    util.iclearTable(meshPoints)
 
     for i = 1, #shapePoints, 2 do
         local x = (shapePoints[i]/PHYSICSSCALE - self.x)
@@ -102,7 +102,7 @@ function Block:cut(rows)
 
     for _, row in ipairs(rows) do
         if #self.subShapes[row] > 0 then
-            iclearTable(self.subShapes[row])
+            util.iclearTable(self.subShapes[row])
             removed = true
         end
     end
@@ -120,13 +120,13 @@ function Block:cut(rows)
     end
 
     if #shapes > 0 then
-        shapes = combineShapes(shapes)
+        shapes = util.combineShapes(shapes)
 
         -- remove condition: too small for box2d
         for i = #shapes, 1, -1 do
             local shape = shapes[i]
 
-            if not largeenough(shape) then
+            if not util.largeEnough(shape) then
                 print("A shape was removed for being too small")
                 table.remove(shapes, i)
             end
@@ -248,7 +248,7 @@ function Block:setSubShapes()
     local topY = math.huge
     local bottomY = -math.huge
 
-    setPointTable(points, self.piece.body:getWorldPoints(self.shape:getPoints()))
+    util.setPointTable(points, self.piece.body:getWorldPoints(self.shape:getPoints()))
 
     for i = 1, #points, 2 do
         local x, y = points[i], points[i+1]
@@ -267,8 +267,8 @@ function Block:setSubShapes()
     end
 
     -- raytrace the points at which this block crosses lines
-    iclearTable(rayTraceResults.left)
-    iclearTable(rayTraceResults.right)
+    util.iclearTable(rayTraceResults.left)
+    util.iclearTable(rayTraceResults.right)
 
     for row = topRow, bottomRow-1 do
         -- FROM LEFT
@@ -307,7 +307,7 @@ function Block:setSubShapes()
 
     -- clear subshape table (saves memory?)
     for row, subShape in pairs(self.subShapes) do
-        iclearTable(self.subShapes[row])
+        util.iclearTable(self.subShapes[row])
     end
 
     -- start assigning points to rows
@@ -330,7 +330,7 @@ function Block:setSubShapes()
                     subShape[i], subShape[i+1] = self.piece.body:getLocalPoint(subShape[i], subShape[i+1])
                 end
 
-                self.piece.playfield:addArea(row, polygonarea(subShape))
+                self.piece.playfield:addArea(row, util.polygonArea(subShape))
             end
         end
     end

@@ -10,7 +10,7 @@ function Timer.setTimer(func, t)
 end
 
 function Timer.managedUpdate(dt)
-	updateGroup(timers, dt)
+	util.updateGroup(timers, dt)
 end
 
 function Timer:initialize(func, t)

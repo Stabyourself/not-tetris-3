@@ -5,7 +5,7 @@ function game:init()
 end
 
 function game:update(dt)
-    updateGroup(self.playfields, dt)
+    util.updateGroup(self.playfields, dt)
 end
 
 function game:draw()

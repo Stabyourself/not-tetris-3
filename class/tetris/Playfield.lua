@@ -59,7 +59,7 @@ function Playfield:initialize(game, x, y, columns, rows, player, randomizer, mir
 end
 
 function Playfield:update(dt)
-    updateGroup(self.clearAnimations, dt)
+    util.updateGroup(self.clearAnimations, dt)
 
     if self.paused then
         return
@@ -473,7 +473,7 @@ function Playfield:checkClearRow()
         end
 
         if #toClear >= 4 then
-            BACKGROUND:flashStuff()
+            game.background:flashStuff()
             audioManager.play("tetris")
         else
             audioManager.play("clear")

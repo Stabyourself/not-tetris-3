@@ -118,7 +118,7 @@ function Piece:separateBlocks()
         local enteredAnywhere = false
 
         for pointI = 1, #shapes[blockI], 2 do
-            local foundShapeI, foundPointI = findPointInShapes(shapes, shapes[blockI][pointI], shapes[blockI][pointI+1], blockI, 4)
+            local foundShapeI, foundPointI = util.findPointInShapes(shapes, shapes[blockI][pointI], shapes[blockI][pointI+1], blockI, 4)
 
             if foundShapeI then
                 -- check already entered
@@ -153,14 +153,14 @@ function Piece:separateBlocks()
             local found = false
 
             for _, group in ipairs(groups) do
-                if inTable(group, pair[1]) then
-                    if not inTable(group, pair[2]) then
+                if table.includesI(group, pair[1]) then
+                    if not table.includesI(group, pair[2]) then
                         table.insert(group, pair[2])
                     end
 
                     found = true
-                elseif inTable(group, pair[2]) then
-                    if not inTable(group, pair[1]) then
+                elseif table.includesI(group, pair[2]) then
+                    if not table.includesI(group, pair[1]) then
                         table.insert(group, pair[1])
                     end
 
@@ -185,7 +185,7 @@ function Piece:separateBlocks()
             for j = #self.blocks, 1, -1 do
                 local block = self.blocks[j]
 
-                if not inTable(group, j) then
+                if not table.includesI(group, j) then
                     block.fixture:destroy()
                     table.remove(self.blocks, j)
                 end

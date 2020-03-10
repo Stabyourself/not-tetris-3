@@ -7,7 +7,7 @@ local advanceDT = 1/60
 local playing = true
 local advanceFrame = false
 
-FFKEYS = {
+local FFKEYS = {
     {key="-", val=0.1},
     {key=".", val=0.001},
     {key="+", val=10},

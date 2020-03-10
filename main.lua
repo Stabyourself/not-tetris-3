@@ -5,6 +5,7 @@ local camera
 
 function love.load()
     -- general setup
+    game = {} -- container of evil globals
     require "variables"
 
     if FIXEDRNG then
@@ -22,7 +23,7 @@ function love.load()
 
 
     -- loading libs
-    require "lib.util"
+    util = require "lib.util"
     GAMESTATE = require "lib.gamestate"
     CLASS = require "lib.middleclass"
     FRAMEDEBUG3 = require "lib.FrameDebug3"
@@ -40,7 +41,7 @@ function love.load()
     preDraw = require("gamestates.preDraw"):new(camera) -- is this? I honestly don't know lmao
     postDraw = require("gamestates.postDraw"):new(camera)
     background = require("gamestates.background"):new(camera)
-    BACKGROUND = background -- this'll have to do for now.
+    game.background = background
 
     -- let everything adjust to the window before we start
     love.resize(love.graphics.getDimensions())

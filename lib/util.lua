@@ -1,4 +1,6 @@
-function updateGroup(group, dt)
+local util = {}
+
+function util.updateGroup(group, dt)
 	for i = #group, 1, -1 do
 		if group[i]:update(dt) or group[i].deleteMe then
 			table.remove(group, i)
@@ -6,9 +8,9 @@ function updateGroup(group, dt)
 	end
 end
 
-function print_r (t, name, indent) -- Credits to http://www.hpelbers.org/lua/print_r
+function util.print_r (t, name, indent) -- Credits to http://www.hpelbers.org/lua/print_r
     local tableList = {}
-    function table_r (t, name, indent, full)
+    local function table_r (t, name, indent, full)
       local id = not full and name
           or type(name)~="number" and tostring(name) or '['..name..']'
       local tag = indent .. id .. ' = '
@@ -35,16 +37,7 @@ function print_r (t, name, indent) -- Credits to http://www.hpelbers.org/lua/pri
     print(table_r(t,name or 'Value',indent or ''))
 end
 
-function inTable(t, needle)
-	for i, v in pairs(t) do
-		if v == needle then
-			return i
-		end
-	end
-	return false
-end
-
-function polygonarea(coords) --calculates the area of a polygon
+function util.polygonArea(coords) --calculates the area of a polygon
 	--Also written by Adam (see below)
 	local anchorX = coords[1]
 	local anchorY = coords[2]
@@ -68,7 +61,7 @@ function polygonarea(coords) --calculates the area of a polygon
 	return area
 end
 
-function largeenough(coords) --checks if a polygon is good enough for box2d's snobby standards.
+function util.largeEnough(coords) --checks if a polygon is good enough for box2d's snobby standards.
 	--Written by Adam/earthHunter
 
 	-- Calculation of centroids of each triangle
@@ -168,19 +161,14 @@ function largeenough(coords) --checks if a polygon is good enough for box2d's sn
 
 end
 
-function drawLinedPolygon(points)
+function util.drawLinedPolygon(points)
 	for i = 1, #points-2, 2 do
 		love.graphics.line(points[i], points[i+1], points[i+2], points[i+3])
 	end
 	love.graphics.line(points[#points-1], points[#points], points[1], points[2])
 end
 
-function floatEqual(a, b, accuracy)
-	-- return a==b
-	return math.abs(a-b) < 1/10^(accuracy or 8)
-end
-
-function findPointInShapes(shapes, x, y, notShape, accuracy)
+function util.findPointInShapes(shapes, x, y, notShape, accuracy)
 	for i = 1, #shapes do
 		if i ~= notShape then
 			local shape = shapes[i]
@@ -189,7 +177,7 @@ function findPointInShapes(shapes, x, y, notShape, accuracy)
 				local sx = shape[j]
 				local sy = shape[j+1]
 
-				if floatEqual(x, sx, accuracy) and floatEqual(y, sy, accuracy) then
+				if math.floatEqual(x, sx, accuracy) and math.floatEqual(y, sy, accuracy) then
 					return i, j
 				end
 			end
@@ -199,7 +187,7 @@ function findPointInShapes(shapes, x, y, notShape, accuracy)
 	return false
 end
 
-function combineShapes(shapes)
+function util.combineShapes(shapes)
 	local newShapes = {}
 	local newShape = {}
 
@@ -211,7 +199,7 @@ function combineShapes(shapes)
 			local firstPointI = 1
 			local firstShapeI = shapeI
 
-			while findPointInShapes(shapes, shape[firstPointI], shape[firstPointI+1], shapeI) do
+			while util.findPointInShapes(shapes, shape[firstPointI], shape[firstPointI+1], shapeI) do
 				firstPointI = firstPointI+2
 			end
 			local pointI = firstPointI
@@ -224,7 +212,7 @@ function combineShapes(shapes)
 					pointI = 1
 				end
 
-				local foundShapeI, foundPointI = findPointInShapes(shapes, shapes[shapeI][pointI], shapes[shapeI][pointI+1], shapeI)
+				local foundShapeI, foundPointI = util.findPointInShapes(shapes, shapes[shapeI][pointI], shapes[shapeI][pointI+1], shapeI)
 
 				if foundShapeI then -- traversal point
 					shapeI = foundShapeI
@@ -255,19 +243,19 @@ function combineShapes(shapes)
 	return newShapes
 end
 
-function iclearTable(t)
+function util.iclearTable(t)
 	for i = #t, 1, -1 do
 		t[i] = nil
 	end
 end
 
-function clearTable(t)
+function util.clearTable(t)
 	for i in pairs(t) do
 		t[i] = nil
 	end
 end
 
-function setPointTable(t, x1, y1, x2, y2, x3, y3, x4, y4, x5, y5, x6, y6, x7, y7, x8, y8) -- this is good code, I promise
+function util.setPointTable(t, x1, y1, x2, y2, x3, y3, x4, y4, x5, y5, x6, y6, x7, y7, x8, y8) -- this is good code, I promise
 	t[1] = x1
 	t[2] = y1
 	t[3] = x2
@@ -286,6 +274,16 @@ function setPointTable(t, x1, y1, x2, y2, x3, y3, x4, y4, x5, y5, x6, y6, x7, y7
 	t[16] = y8
 end
 
+function table.includesI(t, needle)
+	for i, v in ipairs(t) do
+		if v == needle then
+			return i
+		end
+	end
+	return false
+end
+
+
 function math.sign(a)
 	if a < 0 then
 		return -1
@@ -295,3 +293,10 @@ function math.sign(a)
 		return 0
 	end
 end
+
+function math.floatEqual(a, b, accuracy)
+	-- return a==b
+	return math.abs(a-b) < 1/10^(accuracy or 8)
+end
+
+return util

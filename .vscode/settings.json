@@ -1,0 +1,7 @@
+{
+    "Lua.diagnostics.globals": [
+        "game",
+        "love",
+        "util"
+    ]
+}
