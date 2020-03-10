@@ -5,8 +5,7 @@ tileImg:setWrap("repeat", "repeat")
 local tileImgFlashing = love.graphics.newImage("img/border_tiled_flashing.png")
 tileImgFlashing:setWrap("repeat", "repeat")
 
-function background:initialize(camera)
-    self.camera = camera
+function background:initialize()
     self.flash = false
 end
 
@@ -21,7 +20,7 @@ function background:draw()
         end
     end
 
-    love.graphics.draw(img, self.tileQuad, 0, 0, 0, self.camera.scale)
+    love.graphics.draw(img, self.tileQuad, 0, 0, 0, game.camera.scale)
 end
 
 function background:flashStuff()
@@ -29,7 +28,7 @@ function background:flashStuff()
 end
 
 function background:resize(w, h)
-    local x, y = self.camera:worldCoords(0, 0)
+    local x, y = game.camera:worldCoords(0, 0)
     self.tileQuad = love.graphics.newQuad(x, y, w, h, 64, 64)
 end
 

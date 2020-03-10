@@ -206,6 +206,16 @@ function Playfield:draw()
         love.graphics.setColor(1, 1, 1)
     end
 
+    local x1, y1 = game.camera:cameraCoords(self.x, self.y)
+    local x2, y2 = game.camera:cameraCoords(self.x + self.columns*BLOCKSCALE, self.y + self.rows*BLOCKSCALE)
+
+    local x = math.ceil(x1)
+    local y = math.ceil(y1)
+    local w = math.ceil(x2-x1)
+    local h = math.ceil(y2-y1)
+
+    love.graphics.setScissor(x, y, w, h)
+
     -- love.graphics.setScissor(self.x*SCALE+xOffset, self.y*SCALE+yOffset, self.columns*BLOCKSCALE*SCALE, self.rows*BLOCKSCALE*SCALE)
 
     for _, v in ipairs(self.pieces) do
@@ -229,7 +239,7 @@ function Playfield:draw()
     end
 
     love.graphics.pop()
-    -- love.graphics.setScissor()
+    love.graphics.setScissor()
 end
 
 function Playfield:worldToRow(y)

@@ -36,11 +36,11 @@ function love.load()
     CONTROLSLOADER.loadSP()
 
     -- creating gamestate stuff
-    camera = require("lib.camera")() -- is this good code?
+    game.camera = require("lib.camera")() -- is this good code?
 
-    preDraw = require("gamestates.preDraw"):new(camera) -- is this? I honestly don't know lmao
-    postDraw = require("gamestates.postDraw"):new(camera)
-    background = require("gamestates.background"):new(camera)
+    preDraw = require("gamestates.preDraw"):new() -- is this? I honestly don't know lmao
+    postDraw = require("gamestates.postDraw"):new()
+    background = require("gamestates.background"):new()
     game.background = background
 
     -- let everything adjust to the window before we start
@@ -54,8 +54,8 @@ function love.resize(w, h)
     local maxScale = math.min(w/WIDTH, h/HEIGHT)
     local scale = math.floor(maxScale)
 
-    camera:zoomTo(scale)
-    camera:lookAt(WIDTH/2, HEIGHT/2)
+    game.camera:zoomTo(scale)
+    game.camera:lookAt(WIDTH/2, HEIGHT/2)
 
     background:resize(w, h)
 end

@@ -275,14 +275,13 @@ function util.setPointTable(t, x1, y1, x2, y2, x3, y3, x4, y4, x5, y5, x6, y6, x
 end
 
 function table.includesI(t, needle)
-	for i, v in ipairs(t) do
-		if v == needle then
+	for i = #t, 1, -1 do
+		if t[i] == needle then
 			return i
 		end
 	end
 	return false
 end
-
 
 function math.sign(a)
 	if a < 0 then
