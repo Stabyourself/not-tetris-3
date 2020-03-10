@@ -1,11 +1,12 @@
 local Playfield = CLASS("Playfield")
+local audioManager = require "lib.audioManager3"
 
 local Wall = require "class.Wall"
-local pieceTypes = require "class.tetris.PieceType"
 local Piece = require "class.tetris.Piece"
 local ClearAnimation = require "class.tetris.ClearAnimation"
 local pieceTypes = require "class.tetris.PieceType"
-local audioManager = require "lib.audioManager3"
+local FillGuide = require "class.tetris.FillGuide"
+
 
 local blockQuads = {}
 
@@ -52,6 +53,11 @@ function Playfield:initialize(game, x, y, columns, rows, player, randomizer, mir
     self.paused = false
     self.pieceEnded = false
 
+    self.fillGuides = {}
+    for row = 1, self.rows do
+        self.fillGuides[row] = FillGuide:new()
+    end
+
     self.pieces = {}
     self:nextPiece()
 
@@ -60,6 +66,7 @@ end
 
 function Playfield:update(dt)
     util.updateGroup(self.clearAnimations, dt)
+    util.updateGroup(self.fillGuides, dt)
 
     if self.paused then
         return
@@ -176,22 +183,7 @@ function Playfield:draw()
             local x = self.areaIndicatorsX
             local y = self.areaIndicatorsY + (row-1)*BLOCKSCALE
 
-            local mul = 0.9 -- maximum width without being a clear (there's a jump to show clearing lines)
-
-            if self.area[row]/(math.floor(self.columns)*BLOCKSIZE) >= LINECLEARREQUIREMENT then
-                mul = 1
-            end
-
-            local factor = math.min(1, self.area[row]/(math.floor(self.columns)*BLOCKSIZE*LINECLEARREQUIREMENT))*mul
-
-            if row%2 == 0 then
-                love.graphics.setColor(LINECOLORS[2])
-            else
-                love.graphics.setColor(0, 0, 0)
-            end
-            love.graphics.rectangle("fill", x, y, math.sign(self.areaIndicatorsWidth)*BLOCKSCALE, BLOCKSCALE)
-            love.graphics.setColor(1, 1, 1)
-            love.graphics.rectangle("fill", x, y, factor*self.areaIndicatorsWidth, BLOCKSCALE)
+            self.fillGuides[row]:draw(x, y, self.areaIndicatorsWidth)
         end
     end
 
@@ -215,8 +207,6 @@ function Playfield:draw()
     local h = math.ceil(y2-y1)
 
     love.graphics.setScissor(x, y, w, h)
-
-    -- love.graphics.setScissor(self.x*SCALE+xOffset, self.y*SCALE+yOffset, self.columns*BLOCKSCALE*SCALE, self.rows*BLOCKSCALE*SCALE)
 
     for _, v in ipairs(self.pieces) do
         v:draw()
@@ -276,6 +266,18 @@ function Playfield:updateLines()
             end
         -- end
     end
+
+    -- update fillGuides
+    for row = 1, self.rows do
+        local mul = 0.9 -- maximum width without being a clear (there's a jump to show clearing lines)
+
+        if self.area[row]/(math.floor(self.columns)*BLOCKSIZE) >= LINECLEARREQUIREMENT then
+            mul = 1
+        end
+
+        self.fillGuides[row]:smoothSet(math.min(1, self.area[row]/(math.floor(self.columns)*BLOCKSIZE*LINECLEARREQUIREMENT))*mul)
+    end
+
 end
 
 function Playfield:nextPiece()
@@ -426,6 +428,7 @@ function Playfield:clearRow(rows)
     self.paused = true
     for _, row in ipairs(rows) do
         table.insert(self.clearAnimations, ClearAnimation:new(self, row))
+        self.fillGuides[row]:smoothSet(0)
     end
 
     TIMER.setTimer(function()
