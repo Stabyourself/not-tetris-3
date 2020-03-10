@@ -1,4 +1,4 @@
-local Block = class("Block")
+local Block = CLASS("Block")
 
 function Block:initialize(piece, shape, x, y, img, quadI)
     self.piece = piece
@@ -75,6 +75,7 @@ end
 
 local meshPoints = {}
 local shapePoints = {}
+--- Updates the mesh used for drawing the block, based on the physical shape
 function Block:setMesh()
     setPointTable(shapePoints, self.shape:getPoints())
 
@@ -94,6 +95,7 @@ function Block:setMesh()
     self.mesh:setTexture(self.img)
 end
 
+--- Main function for cutting out rows of a block (based on the cached subShapes)
 function Block:cut(rows)
     -- remove condition: row being deleted
     local removed = false
@@ -188,6 +190,7 @@ end
 local rayTraceResults = {left={}, right={}}
 local points = {}
 
+--- Handles the entry of a single point into the subShape table
 local function doPoint(block, previousRow, x, y, add, bottomY)
     local row
 
@@ -233,6 +236,7 @@ local function doPoint(block, previousRow, x, y, add, bottomY)
     return row
 end
 
+--- Divides a block into row-based sub shapes and stores those in block.subShapes
 function Block:setSubShapes()
     -- doing all of this inline because I expect this to be performance-important code
     -- can be broken up later
@@ -251,6 +255,7 @@ function Block:setSubShapes()
 
         if x < 0 or x > self.piece.playfield.columns*PHYSICSSCALE then
             -- might crash
+            print("block was outside playfield")
             return
         end
 
@@ -300,10 +305,12 @@ function Block:setSubShapes()
         rayTraceResults.right[row] = hitx
     end
 
+    -- clear subshape table (saves memory?)
     for row, subShape in pairs(self.subShapes) do
         iclearTable(self.subShapes[row])
     end
 
+    -- start assigning points to rows
     local previousRow = false
     for i = 1, #points, 2 do
         previousRow = doPoint(self, previousRow, points[i], points[i+1], true, bottomY)

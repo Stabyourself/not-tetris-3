@@ -1,7 +1,7 @@
-local Piece = class("Piece")
+local Piece = CLASS("Piece")
 local audioManager = require "lib.audioManager3"
 
-local Block = require "class.tetris.Block"
+local Block = require "CLASS.tetris.Block"
 
 function Piece:initialize(playfield)
     self.playfield = playfield
@@ -17,6 +17,7 @@ function Piece:initialize(playfield)
     self.active = true
 end
 
+--- Returns a piece from a piece type (like, T or O)
 function Piece.fromPieceType(playfield, pieceType)
     local piece = Piece:new(playfield)
 
@@ -37,6 +38,7 @@ function Piece.fromPieceType(playfield, pieceType)
     return piece
 end
 
+--- Returns a piece from a list of shapes
 function Piece.fromShapes(playfield, shapes)
     local piece = Piece:new(playfield)
 
@@ -49,6 +51,7 @@ function Piece.fromShapes(playfield, shapes)
     return piece
 end
 
+--- Stops the piece from falling too fast, based on the level usually
 function Piece:limitDownwardVelocity()
     local speedX, speedY = self.body:getLinearVelocity()
 
@@ -84,6 +87,7 @@ function Piece:rotate(dir)
     self.body:applyTorque(ROTATEFORCE*dir, 0)
 end
 
+--- Cuts a piece in rows
 function Piece:cut(rows)
     for i = #self.blocks, 1, -1 do
         self.blocks[i]:cut(rows)
@@ -99,6 +103,7 @@ function Piece:cut(rows)
     self:separateBlocks()
 end
 
+--- Handles blocks that are no longer connected, creating new pieces as required
 function Piece:separateBlocks()
     local shapes = {}
 

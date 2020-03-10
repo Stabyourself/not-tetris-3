@@ -1,5 +1,5 @@
 local game = require "gamestates.game._game"
-local game_a = class("game_a", game)
+local game_a = CLASS("game_a", game)
 local Playfield = require "class.tetris.Playfield"
 local NESRandomizer = require "class.tetris.randomizers.NESRandomizer"
 local blockGraphicPacks = require "blockGraphicsPackLoader"
@@ -11,8 +11,8 @@ function game_a:enter()
 
     game.init(self)
 
-    controlsLoader.loadSP()
-    table.insert(self.playfields, Playfield:new(self, 95, 41, 10.25, 20, controls[1], self.randomizer, true, blockGraphicPacks.NES))
+    CONTROLSLOADER.loadSP()
+    table.insert(self.playfields, Playfield:new(self, 95, 41, 10.25, 20, CONTROLS[1], self.randomizer, true, blockGraphicPacks.NES))
     self.playfields[1].areaIndicatorsX = -10
 
     self.playfields[1].areaIndicatorsY = 0

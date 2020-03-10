@@ -1,4 +1,4 @@
-ClearAnimation = class("ClearAnimation")
+ClearAnimation = CLASS("ClearAnimation")
 
 function ClearAnimation:initialize(playfield, row)
     self.playfield = playfield

@@ -1,4 +1,4 @@
-local Wall = class("Wall")
+local Wall = CLASS("Wall")
 
 function Wall:initialize(world, x, y, w, h, friction)
     self.body = love.physics.newBody(world, 0, 0, "static")

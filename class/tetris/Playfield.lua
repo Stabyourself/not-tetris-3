@@ -1,4 +1,4 @@
-local Playfield = class("Playfield")
+local Playfield = CLASS("Playfield")
 
 local Wall = require "class.Wall"
 local pieceTypes = require "class.tetris.PieceType"
@@ -206,7 +206,7 @@ function Playfield:draw()
         love.graphics.setColor(1, 1, 1)
     end
 
-    love.graphics.setScissor(self.x*SCALE+xOffset, self.y*SCALE+yOffset, self.columns*BLOCKSCALE*SCALE, self.rows*BLOCKSCALE*SCALE)
+    -- love.graphics.setScissor(self.x*SCALE+xOffset, self.y*SCALE+yOffset, self.columns*BLOCKSCALE*SCALE, self.rows*BLOCKSCALE*SCALE)
 
     for _, v in ipairs(self.pieces) do
         v:draw()
@@ -229,7 +229,7 @@ function Playfield:draw()
     end
 
     love.graphics.pop()
-    love.graphics.setScissor()
+    -- love.graphics.setScissor()
 end
 
 function Playfield:worldToRow(y)
@@ -290,6 +290,7 @@ end
 function Playfield.postSolve(a, b)
     local aObject = a:getBody():getUserData()
     local bObject = b:getBody():getUserData()
+    local otherObject
 
     local piece = false
 
@@ -304,7 +305,7 @@ function Playfield.postSolve(a, b)
     end
 
     if piece and not otherObject.dontDrop then
-        self = piece.playfield
+        local self = piece.playfield
 
         -- some velocity check here maybe
 
@@ -352,7 +353,7 @@ function Playfield:checkGarbageSpawn()
         self.queuedGarbage = 0
         self.pieceSpawnTimer = 0
 
-        Timer.setTimer(function() self.spawnNewPieceNextFrame = true end, garbageWaitTime)
+        TIMER.setTimer(function() self.spawnNewPieceNextFrame = true end, garbageWaitTime)
     else
         self.spawnNewPieceNextFrame = true
     end
@@ -417,7 +418,7 @@ function Playfield:clearRow(rows)
         table.insert(self.clearAnimations, ClearAnimation:new(self, row))
     end
 
-    Timer.setTimer(function()
+    TIMER.setTimer(function()
         for i = #self.pieces, 1, -1 do
             self.pieces[i]:cut(rows)
         end
@@ -456,10 +457,11 @@ function Playfield:checkClearRow()
         local BASE = 200
         local LINES_BASE = -0.4
         local LINES_DIVISOR = 1.8
+        local level = self.level
         local LEVEL_BASE = 1
         local LEVEL_DIVISOR = 0.62
 
-        local toAdd = clearRatio*(BASE*(LINES_BASE+#toClear/LINES_DIVISOR))*((self.level+LEVEL_BASE)/LEVEL_DIVISOR)
+        local toAdd = clearRatio*(BASE*(LINES_BASE+#toClear/LINES_DIVISOR))*((level+LEVEL_BASE)/LEVEL_DIVISOR)
 
         self.score = self.score + toAdd
 
@@ -471,7 +473,7 @@ function Playfield:checkClearRow()
         end
 
         if #toClear >= 4 then
-            background:flashStuff()
+            -- background:flashStuff()
             audioManager.play("tetris")
         else
             audioManager.play("clear")

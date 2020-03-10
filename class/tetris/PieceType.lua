@@ -1,4 +1,4 @@
-local PieceType = class("PieceType")
+local PieceType = CLASS("PieceType")
 
 function PieceType:initialize(map)
     self.map = map

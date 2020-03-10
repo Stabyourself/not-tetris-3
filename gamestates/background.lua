@@ -1,38 +1,36 @@
-local background = class("background")
+local background = CLASS("background")
 
 local tileImg = love.graphics.newImage("img/border_tiled.png")
 tileImg:setWrap("repeat", "repeat")
 local tileImgFlashing = love.graphics.newImage("img/border_tiled_flashing.png")
 tileImgFlashing:setWrap("repeat", "repeat")
 
+function background:initialize(camera)
+    self.camera = camera
+    self.flash = false
+end
+
 function background:draw()
     local img = tileImg
 
-    if flashBackground then
-        img = tileImgFlashing
-    end
-
-    love.graphics.draw(img, self.tileQuad, 0, 0, 0, SCALE)
-end
-
-function background:update(dt)
     if self.flashTimer and self.flashTimer:getTimeLeft() > 0 then
-        local flashCycle = self.flashTimer:getTimeLeft()%(flashOnTime+flashOffTime)
+        local flashCycle = self.flashTimer:getTimeLeft()%(FLASHTIMEON+FLASHTIMEOFF)
 
-        if flashCycle < flashOnTime then
-            flashBackground = true
-        else
-            flashBackground = false
+        if flashCycle < FLASHTIMEON then
+            img = tileImgFlashing
         end
     end
+
+    love.graphics.draw(img, self.tileQuad, 0, 0, 0, self.camera.scale)
 end
 
 function background:flashStuff()
-    self.flashTimer = Timer.setTimer(function() flashBackground = false end, LINECLEARTIME)
+    self.flashTimer = TIMER.setTimer(function() self.flash = false end, LINECLEARTIME)
 end
 
 function background:resize(w, h)
-    self.tileQuad = love.graphics.newQuad(-xOffset/SCALE, -yOffset/SCALE, w, h, 64, 64)
+    local x, y = self.camera:worldCoords(0, 0)
+    self.tileQuad = love.graphics.newQuad(x, y, w, h, 64, 64)
 end
 
 return background

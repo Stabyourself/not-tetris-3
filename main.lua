@@ -1,12 +1,10 @@
-xOffset = 0
-yOffset = 0
-
-gamestate = require "lib.gamestate"
-class = require "lib.middleclass"
-frameDebug3 = require "lib.FrameDebug3"
-Timer = require "lib.Timer"
+local preDraw
+local postDraw
+local background
+local camera
 
 function love.load()
+    -- general setup
     require "variables"
 
     if FIXEDRNG then
@@ -15,43 +13,47 @@ function love.load()
 
     love.graphics.setDefaultFilter("nearest", "nearest")
 
+    love.graphics.setLineWidth(1)
+
+    love.physics.setMeter(METER)
+
+    local font = love.graphics.newImageFont("img/font.png", [[0123456789abcdefghijklmnopqrstuvwxyz.:/,"C-_A* !{}?'()+=><#@]])
+    love.graphics.setFont(font)
 
 
+    -- loading libs
     require "lib.util"
-
+    GAMESTATE = require "lib.gamestate"
+    CLASS = require "lib.middleclass"
+    FRAMEDEBUG3 = require "lib.FrameDebug3"
+    TIMER = require "lib.Timer"
 
     local audioManager = require "lib.audioManager3"
     audioManager.load()
 
     require "controls"
-    controlsLoader.loadSP()
+    CONTROLSLOADER.loadSP()
 
+    -- creating gamestate stuff
+    camera = require("lib.camera")() -- is this good code?
 
-    love.graphics.setLineWidth(1/SCALE)
-    love.physics.setMeter(METER)
+    preDraw = require("gamestates.preDraw"):new(camera) -- is this? I honestly don't know lmao
+    postDraw = require("gamestates.postDraw"):new(camera)
+    background = require("gamestates.background"):new(camera)
 
-    preDraw = require("gamestates.preDraw"):new()
-    postDraw = require("gamestates.postDraw"):new()
-    background = require("gamestates.background"):new()
-
-    local font = love.graphics.newImageFont("img/font.png", [[0123456789abcdefghijklmnopqrstuvwxyz.:/,"C-_A* !{}?'()+=><#@]])
-    love.graphics.setFont(font)
-
+    -- let everything adjust to the window before we start
     love.resize(love.graphics.getDimensions())
 
-
-    gamestate.switch(require("gamestates.game.type_a"):new())
+    -- aight cool let's go
+    GAMESTATE.switch(require("gamestates.game.type_a"):new())
 end
 
 function love.resize(w, h)
     local maxScale = math.min(w/WIDTH, h/HEIGHT)
-
     local scale = math.floor(maxScale)
 
-    SCALE = scale
-
-    xOffset = math.ceil(((w-SCALE*WIDTH)/2)/SCALE)*SCALE
-    yOffset = math.ceil(((h-SCALE*HEIGHT)/2)/SCALE)*SCALE
+    camera:zoomTo(scale)
+    camera:lookAt(WIDTH/2, HEIGHT/2)
 
     background:resize(w, h)
 end
@@ -60,21 +62,20 @@ function love.draw()
     background:draw()
     preDraw:draw()
 
-    gamestate.current():draw()
+    GAMESTATE.current():draw()
 
     postDraw:draw()
 end
 
 function love.update(dt)
-    dt = frameDebug3.update(dt)
+    dt = FRAMEDEBUG3.update(dt)
 
-    for _, control in ipairs(controls) do
+    for _, control in ipairs(CONTROLS) do
         control:update()
     end
 
-    Timer.managedUpdate(dt)
-    background:update(dt)
-    gamestate.current():update(dt)
+    TIMER.managedUpdate(dt)
+    GAMESTATE.current():update(dt)
 end
 
 function love.keypressed(key)
@@ -88,10 +89,10 @@ function love.keypressed(key)
     end
 
     if key == "#" then
-        frameDebug3.frameAdvance()
+        FRAMEDEBUG3.frameAdvance()
     end
 
     if key == "pause" then
-        frameDebug3.pausePlay()
+        FRAMEDEBUG3.pausePlay()
     end
 end

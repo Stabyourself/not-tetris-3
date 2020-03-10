@@ -1,4 +1,4 @@
-local Randomizer = class("_Randomizer")
+local Randomizer = CLASS("_Randomizer")
 
 local mirrorTable = {
     1, 6, 5, 4, 3, 2, 7

@@ -1,4 +1,4 @@
-local Menu = class("Menu")
+local Menu = CLASS("Menu")
 
 local logo = love.graphics.newImage("img/logo.png")
 
@@ -19,7 +19,7 @@ function Menu:update(dt)
             end
         end
 
-        if controls[i]:pressed("rotate_left") or controls[i]:pressed("rotate_right") or controls[i]:pressed("start") then
+        if CONTROLS[i]:pressed("rotate_left") or CONTROLS[i]:pressed("rotate_right") or CONTROLS[i]:pressed("start") then
             self.ready[i] = true
             self.unreadyTimer[i] = 0
 
@@ -64,7 +64,7 @@ press start on both players]], 0, 80, WIDTH, "center")
 end
 
 function Menu:startGame()
-    gamestate.switch(require("gamestates.game.versus"):new())
+    GAMESTATE.switch(require("gamestates.game.versus"):new())
 end
 
 return Menu

@@ -1,4 +1,4 @@
-local BlockGraphicsPack = class("BlockGraphicsPack")
+local BlockGraphicsPack = CLASS("BlockGraphicsPack")
 
 function BlockGraphicsPack:initialize(dir)
     self.graphics = {}

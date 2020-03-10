@@ -1,4 +1,4 @@
-local game = class("Game")
+local game = CLASS("Game")
 
 function game:init()
     self.playfields = {}

@@ -156,7 +156,7 @@ function largeenough(coords) --checks if a polygon is good enough for box2d's sn
 		local projection = (coords[i] - centroidX) * normals[i]
 				+ (coords[i + 1] - centroidY) * normals[i + 1]
 
-		if (projection < 0.02*METER) then
+		if (projection < 0.02*METER) then -- can go as low as 0.001
 
 			return false
 
@@ -247,6 +247,7 @@ function combineShapes(shapes)
 		end
 	end
 
+	-- clean up after ourselves
 	for _, shape in ipairs(shapes) do
 		shape.traversed = nil
 	end

@@ -1,9 +1,11 @@
-local preDraw = class("preDraw")
+local preDraw = CLASS("preDraw")
+
+function preDraw:initialize(camera)
+    self.camera = camera
+end
 
 function preDraw:draw()
-    love.graphics.push()
-    love.graphics.translate(xOffset, yOffset)
-    love.graphics.scale(SCALE, SCALE)
+    self.camera:attach()
 end
 
 return preDraw

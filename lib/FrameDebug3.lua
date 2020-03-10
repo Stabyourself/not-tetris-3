@@ -2,7 +2,7 @@
 
 local FrameDebug3 = {}
 
-local advanceDT = WORLDUPDATEINTERVAL
+local advanceDT = 1/60
 
 local playing = true
 local advanceFrame = false

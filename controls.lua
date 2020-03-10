@@ -1,11 +1,11 @@
 local baton = require "lib.baton"
-controls = {}
-controlsLoader = {}
+CONTROLS = {}
+CONTROLSLOADER = {}
 
-function controlsLoader.loadSP()
-    controls = {}
+function CONTROLSLOADER.loadSP()
+    CONTROLS = {}
 
-    controls[1] = baton.new({
+    CONTROLS[1] = baton.new({
         controls = {
             left = {'key:a', "key:left", 'axis:leftx-', 'hat:1l', 'hat:1ld'},
             right = {'key:d', "key:right", 'axis:leftx+', 'hat:1r', 'hat:1rd'},
@@ -26,10 +26,10 @@ function controlsLoader.loadSP()
     })
 end
 
-function controlsLoader.loadMP()
-    controls = {}
+function CONTROLSLOADER.loadMP()
+    CONTROLS = {}
 
-    controls[1] = baton.new({
+    CONTROLS[1] = baton.new({
         controls = {
             left = {'key:a', 'axis:leftx-', 'hat:1l', 'hat:1ld'},
             right = {'key:d', 'axis:leftx+', 'hat:1r', 'hat:1rd'},
@@ -45,7 +45,7 @@ function controlsLoader.loadMP()
         joystick = love.joystick.getJoysticks()[1],
     })
 
-    controls[2] = baton.new({
+    CONTROLS[2] = baton.new({
         controls = {
             left = {'key:left', 'axis:leftx-', 'hat:1l', 'hat:1ld'},
             right = {'key:right', 'axis:leftx+', 'hat:1r', 'hat:1rd'},

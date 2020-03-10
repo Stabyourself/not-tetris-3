@@ -1,7 +1,11 @@
-local postDraw = class("postDraw")
+local postDraw = CLASS("postDraw")
+
+function postDraw:initialize(camera)
+    self.camera = camera
+end
 
 function postDraw:draw()
-    love.graphics.pop()
+    self.camera:detach()
 
     love.graphics.push()
     love.graphics.scale(SCALE, SCALE)

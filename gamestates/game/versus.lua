@@ -1,5 +1,5 @@
 local Game = require "gamestates.game._game"
-local Game_versus = class("Game_versus", Game)
+local Game_versus = CLASS("Game_versus", Game)
 local Playfield = require "class.tetris.Playfield"
 local NESRandomizer = require "class.tetris.randomizers.NESRandomizer"
 local blockGraphicPacks = require "blockGraphicsPackLoader"
@@ -11,9 +11,9 @@ function Game_versus:enter()
 
     self.randomizer = NESRandomizer:new()
 
-    controlsLoader.loadMP()
-    table.insert(self.playfields, Playfield:new(self, 15, 38, 10.25, 20, controls[1], self.randomizer, false, blockGraphicPacks.NES))
-    table.insert(self.playfields, Playfield:new(self, 159, 38, 10.25, 20, controls[2], self.randomizer, true, blockGraphicPacks.NES))
+    CONTROLSLOADER.loadMP()
+    table.insert(self.playfields, Playfield:new(self, 15, 38, 10.25, 20, CONTROLS[1], self.randomizer, false, blockGraphicPacks.NES))
+    table.insert(self.playfields, Playfield:new(self, 159, 38, 10.25, 20, CONTROLS[2], self.randomizer, true, blockGraphicPacks.NES))
 
     self.playfields[1].areaIndicatorsX = (self.playfields[1].columns+1)*BLOCKSCALE+3
 
@@ -79,10 +79,10 @@ function Game_versus:topOut(playfield)
     if not self.playfields[otherPly].dead then
         self.winner = otherPly
 
-        Timer.setTimer(function()
+        TIMER.setTimer(function()
             self.showWinner = true
-            Timer.setTimer(function()
-                gamestate.switch(require("gamestates.menu"):new())
+            TIMER.setTimer(function()
+                GAMESTATE.switch(require("gamestates.menu"):new())
             end, 4)
         end, 2)
     end
