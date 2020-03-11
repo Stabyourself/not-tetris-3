@@ -26,8 +26,12 @@ function game_a:draw()
     love.graphics.draw(backgroundImg)
 
     love.graphics.print(string.format("lines-%03d", self.playfields[1].lines), 104, 16)
-    love.graphics.print(string.format("level\n  %02d", self.playfields[1].level), 192, 152)
+
+    love.graphics.print(string.format("top\n%06d", 10000), 192, 24)
     love.graphics.print(string.format("score\n%06d", self.playfields[1].score), 192, 48)
+
+    love.graphics.print(string.format("level\n  %02d", self.playfields[1].level), 192, 152)
+
 
     game.draw(self)
 end

@@ -298,4 +298,8 @@ function math.floatEqual(a, b, accuracy)
 	return math.abs(a-b) < 1/10^(accuracy or 8)
 end
 
+function math.round(a)
+	return math.floor(a+.5)
+end
+
 return util
