@@ -13,7 +13,7 @@ function game_a:enter()
 
     CONTROLSLOADER.loadSP()
     table.insert(self.playfields, Playfield:new(self, 95, 41, 10.25, 20, CONTROLS[1], self.randomizer, true, blockGraphicPacks.NES))
-    self.playfields[1].areaIndicatorsX = -10
+    self.playfields[1].areaIndicatorsX = -11
 
     self.playfields[1].areaIndicatorsY = 0
     self.playfields[1].areaIndicatorsWidth = 8
