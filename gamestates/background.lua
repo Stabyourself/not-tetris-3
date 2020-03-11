@@ -6,10 +6,15 @@ local tileImgFlashing = love.graphics.newImage("img/border_tiled_flashing.png")
 tileImgFlashing:setWrap("repeat", "repeat")
 
 function background:initialize()
+    self.active = true
     self.flash = false
 end
 
 function background:draw()
+    if not self.active then
+        return
+    end
+
     local img = tileImg
 
     if self.flashTimer and self.flashTimer:getTimeLeft() > 0 then

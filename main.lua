@@ -47,14 +47,22 @@ function love.load()
     love.resize(love.graphics.getDimensions())
 
     -- aight cool let's go
-    GAMESTATE.switch(require("gamestates.game.type_a"):new())
+    local intro = require("gamestates.intro.intro"):new(WIDTH, HEIGHT, 1)
+
+    intro.onFinish = function()
+        game.background.active = true
+        GAMESTATE.switch(require("gamestates.game.type_a"):new())
+    end
+
+    game.background.active = false
+    GAMESTATE.switch(intro)
 end
 
 function love.resize(w, h)
     local maxScale = math.min(w/WIDTH, h/HEIGHT)
-    local scale = math.floor(maxScale)
+    game.scale = math.floor(maxScale)
 
-    game.camera:zoomTo(scale)
+    game.camera:zoomTo(game.scale)
     game.camera:lookAt(WIDTH/2, HEIGHT/2)
 
     background:resize(w, h)
@@ -80,7 +88,7 @@ function love.update(dt)
     GAMESTATE.current():update(dt)
 end
 
-function love.keypressed(key)
+function love.keypressed(key, scancode)
     -- just debug stuff!
 	if key == "escape" then
 		love.event.quit()
@@ -96,5 +104,9 @@ function love.keypressed(key)
 
     if key == "pause" then
         FRAMEDEBUG3.pausePlay()
+    end
+
+    if GAMESTATE.current().keypressed then
+        GAMESTATE.current():keypressed(key, scancode)
     end
 end

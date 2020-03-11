@@ -294,7 +294,6 @@ function math.sign(a)
 end
 
 function math.floatEqual(a, b, accuracy)
-	-- return a==b
 	return math.abs(a-b) < 1/10^(accuracy or 8)
 end
 
