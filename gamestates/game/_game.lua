@@ -1,6 +1,6 @@
 local game = CLASS("Game")
 
-function game:init()
+function game:enter()
     self.playfields = {}
 end
 

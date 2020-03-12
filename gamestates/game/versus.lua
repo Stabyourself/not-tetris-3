@@ -4,10 +4,10 @@ local Playfield = require "class.tetris.Playfield"
 local NESRandomizer = require "class.tetris.randomizers.NESRandomizer"
 local blockGraphicPacks = require "blockGraphicsPackLoader"
 
-local backgroundImg = love.graphics.newImage("img/background_versus.png")
+local backgroundImg = love.graphics.newImage("img/versus.png")
 
 function Game_versus:enter()
-    Game.init(self)
+    Game.enter(self)
 
     self.randomizer = NESRandomizer:new()
 

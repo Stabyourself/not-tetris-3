@@ -14,7 +14,7 @@ for i = 1, 3 do
     blockQuads[i] = love.graphics.newQuad((i-1)*10+1, 1, 8, 8, 30, 10)
 end
 
-function Playfield:initialize(game, x, y, columns, rows, player, randomizer, mirrored, blockGraphicsPack)
+function Playfield:initialize(game, x, y, columns, rows, player, randomizer, mirrored, blockGraphicsPack, level)
     self.game = game
     self.x = x
     self.y = y
@@ -24,9 +24,9 @@ function Playfield:initialize(game, x, y, columns, rows, player, randomizer, mir
     self.randomizer = randomizer
     self.mirrored = mirrored
     self.blockGraphicsPack = blockGraphicsPack
+    self.level = level or 0
 
     self.score = 0
-    self.level = 0
     self.lines = 0
     self.piececount = 0
 
