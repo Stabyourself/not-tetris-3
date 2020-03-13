@@ -8,7 +8,11 @@ function FillGuide:initialize(w)
 end
 
 function FillGuide:update(dt)
-    self.fill = self.fill+(self.targetFill-self.fill)*dt*20
+    if self.fill < self.targetFill then
+        self.fill = math.min(self.targetFill, self.fill+(self.targetFill-self.fill)*dt*20)
+    else
+        self.fill = math.max(self.targetFill, self.fill+(self.targetFill-self.fill)*dt*20)
+    end
 end
 
 function FillGuide:draw(x, y, w)

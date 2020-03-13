@@ -1,5 +1,5 @@
-local game = require "gamestates.game._game"
-local game_a = CLASS("game_a", game)
+local _game = require "gamestates.game._game"
+local game_a = CLASS("game_a", _game)
 local Playfield = require "class.tetris.Playfield"
 local NESRandomizer = require "class.tetris.randomizers.NESRandomizer"
 local blockGraphicPacks = require "blockGraphicsPackLoader"
@@ -7,7 +7,7 @@ local blockGraphicPacks = require "blockGraphicsPackLoader"
 local backgroundImg = love.graphics.newImage("img/type_a.png")
 
 function game_a:enter(previous, level)
-    game.enter(self)
+    _game.enter(self)
 
     CONTROLSLOADER.loadSP()
 
@@ -20,6 +20,18 @@ function game_a:enter(previous, level)
 
     self.playfields[1].nextPieceX = 113
     self.playfields[1].nextPieceY = 79
+
+    self.gameOver = false
+end
+
+function game_a:update(dt)
+    _game.update(self, dt)
+
+    if self.gameOver then
+        if CONTROLS[1]:pressed("start") then
+            GAMESTATE.switch(require("gamestates.menu.levelSelect"):new())
+        end
+    end
 end
 
 function game_a:draw()
@@ -32,8 +44,11 @@ function game_a:draw()
 
     love.graphics.print(string.format("level\n  %02d", self.playfields[1].level), 192, 152)
 
+    _game.draw(self)
+end
 
-    game.draw(self)
+function game_a:topOut()
+    TIMER.setTimer(function() self.gameOver = true end, 3)
 end
 
 return game_a
