@@ -10,42 +10,6 @@ function levelSelect:initialize()
 end
 
 function levelSelect:update(dt)
-    if CONTROLS[1]:pressed("left") then
-        if self.level > 0 then
-            self.level = self.level - 1
-        end
-
-        audioManager.play("menu_move")
-    end
-
-    if CONTROLS[1]:pressed("right") then
-        if self.level < 9 then
-            self.level = self.level + 1
-        end
-
-        audioManager.play("menu_move")
-    end
-
-    if CONTROLS[1]:pressed("down") then
-        if self.level < 5 then
-            self.level = self.level + 5
-        end
-
-        audioManager.play("menu_move")
-    end
-
-    if CONTROLS[1]:pressed("up") then
-        if self.level > 4 then
-            self.level = self.level - 5
-        end
-
-        audioManager.play("menu_move")
-    end
-
-    if CONTROLS[1]:pressed("start") then
-        self:startGame()
-    end
-
     self.crazyFlashyTimer = self.crazyFlashyTimer + dt
 end
 
@@ -87,6 +51,46 @@ function levelSelect:startGame()
 
     GAMESTATE.switch(require("gamestates.game.type_a"):new(), level)
     audioManager.play("menu_select")
+end
+
+function levelSelect:batonpressed(player, button)
+    if player == CONTROLS[1] then
+        if button == "left" then
+            if self.level > 0 then
+                self.level = self.level - 1
+            end
+
+            audioManager.play("menu_move")
+        end
+
+        if button == "right" then
+            if self.level < 9 then
+                self.level = self.level + 1
+            end
+
+            audioManager.play("menu_move")
+        end
+
+        if button == "down" then
+            if self.level < 5 then
+                self.level = self.level + 5
+            end
+
+            audioManager.play("menu_move")
+        end
+
+        if button == "up" then
+            if self.level > 4 then
+                self.level = self.level - 5
+            end
+
+            audioManager.play("menu_move")
+        end
+
+        if button == "start" then
+            self:startGame()
+        end
+    end
 end
 
 return levelSelect

@@ -166,13 +166,17 @@ function Player:_getControlRawValue(control)
 end
 
 function Player:_updateControls()
-	for _, control in pairs(self._controls) do
+	for name, control in pairs(self._controls) do
 		control.rawValue = self:_getControlRawValue(control)
 		control.value = control.rawValue >= self.config.deadzone and control.rawValue or 0
 		control.downPrevious = control.down
 		control.down = control.value > 0
 		control.pressed = control.down and not control.downPrevious
 		control.released = control.downPrevious and not control.down
+
+		if control.down and not control.downPrevious then
+			love.batonpressed(self, name)
+		end
 	end
 end
 

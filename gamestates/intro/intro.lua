@@ -211,7 +211,7 @@ end
 
 function intro:keypressed()
     if self.onFinish then
-        self.onFinish()
+        TIMER.setTimer(function() self.onFinish() end, 0)
     end
 end
 

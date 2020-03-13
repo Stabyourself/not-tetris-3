@@ -9,7 +9,7 @@ local backgroundImg = love.graphics.newImage("img/type_a.png")
 function game_a:enter(previous, level)
     _game.enter(self)
 
-    CONTROLSLOADER.loadSP()
+    -- CONTROLSLOADER.loadSP()
 
     self.randomizer = NESRandomizer:new()
     table.insert(self.playfields, Playfield:new(self, 95, 41, 10.25, 20, CONTROLS[1], self.randomizer, true, blockGraphicPacks.NES, level))
@@ -26,12 +26,6 @@ end
 
 function game_a:update(dt)
     _game.update(self, dt)
-
-    if self.gameOver then
-        if CONTROLS[1]:pressed("start") then
-            GAMESTATE.switch(require("gamestates.menu.levelSelect"):new())
-        end
-    end
 end
 
 function game_a:draw()
@@ -49,6 +43,14 @@ end
 
 function game_a:topOut()
     TIMER.setTimer(function() self.gameOver = true end, 3)
+end
+
+function game_a:batonpressed(player, button)
+    if self.gameOver then
+        if player == CONTROLS[1] and button == "start" then
+            GAMESTATE.switch(require("gamestates.menu.levelSelect"):new())
+        end
+    end
 end
 
 return game_a

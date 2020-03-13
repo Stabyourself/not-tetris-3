@@ -112,3 +112,9 @@ function love.keypressed(key, scancode)
         GAMESTATE.current():keypressed(key, scancode)
     end
 end
+
+function love.batonpressed(player, button)
+    if GAMESTATE.current().batonpressed then
+        GAMESTATE.current():batonpressed(player, button)
+    end
+end
