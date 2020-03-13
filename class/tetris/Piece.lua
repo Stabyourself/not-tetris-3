@@ -1,7 +1,7 @@
 local Piece = CLASS("Piece")
 local audioManager = require "lib.audioManager3"
 
-local Block = require "CLASS.tetris.Block"
+local Block = require "class.tetris.Block"
 
 function Piece:initialize(playfield)
     self.playfield = playfield
