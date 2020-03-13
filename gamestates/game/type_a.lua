@@ -7,11 +7,11 @@ local blockGraphicPacks = require "blockGraphicsPackLoader"
 local backgroundImg = love.graphics.newImage("img/type_a.png")
 
 function game_a:enter(previous, level)
-    self.randomizer = NESRandomizer:new()
-
     game.enter(self)
 
     CONTROLSLOADER.loadSP()
+
+    self.randomizer = NESRandomizer:new()
     table.insert(self.playfields, Playfield:new(self, 95, 41, 10.25, 20, CONTROLS[1], self.randomizer, true, blockGraphicPacks.NES, level))
     self.playfields[1].areaIndicatorsX = -11
 

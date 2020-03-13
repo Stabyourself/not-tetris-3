@@ -59,7 +59,10 @@ function Playfield:initialize(game, x, y, columns, rows, player, randomizer, mir
     end
 
     self.pieces = {}
-    self:nextPiece()
+    self:nextPiece(true)
+
+    self.firstPieceWait = true
+    TIMER.setTimer(function() self.firstPieceWait = false end, FIRSTPIECEWAITTIME)
 
     self:updateLines()
 end
@@ -70,6 +73,10 @@ function Playfield:update(dt)
 
     if self.paused then
         return
+    end
+
+    if self.player:pressed("down") then
+        self.firstPieceWait = false
     end
 
     -- debug stuff
@@ -245,7 +252,13 @@ function Playfield:getBlockGraphic()
 end
 
 function Playfield:getMaxSpeedY()
-    return MAXSPEEDYBASE + MAXSPEEDYPERLEVEL*self.level
+    local speed = MAXSPEEDYBASE + MAXSPEEDYPERLEVEL*self.level
+
+    if self.firstPieceWait then
+        speed = -4.2 -- don't ask me why
+    end
+
+    return speed
 end
 
 function Playfield:addArea(row, area)
@@ -280,10 +293,14 @@ function Playfield:updateLines()
 
 end
 
-function Playfield:nextPiece()
+function Playfield:nextPiece(first)
     self.piececount = self.piececount + 1
     local pieceNum = self.randomizer:getPiece(self.piececount, self.mirrored)
     local piece = Piece.fromPieceType(self, pieceTypes[pieceNum])
+
+    if first then
+        piece.body:setY(PHYSICSSCALE)
+    end
 
     self.activePiece = piece
 
