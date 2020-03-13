@@ -127,7 +127,7 @@ function Block:cut(rows)
             local shape = shapes[i]
 
             if not util.largeEnough(shape) then
-                print("A shape was removed for being too small")
+                -- print("A shape was removed for being too small")
                 table.remove(shapes, i)
             end
         end
@@ -255,7 +255,7 @@ function Block:setSubShapes()
 
         if x < 0 or x > self.piece.playfield.columns*PHYSICSSCALE then
             -- might crash
-            print("block was outside playfield")
+            -- print("block was outside playfield")
             return
         end
 
