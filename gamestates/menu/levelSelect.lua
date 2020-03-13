@@ -1,4 +1,5 @@
 local levelSelect = CLASS("levelSelect")
+local audioManager = require "lib.audioManager3"
 
 local levelSelectBackground = love.graphics.newImage("img/level_select.png")
 local levelGrid = love.graphics.newImage("img/level_grid.png")
@@ -9,20 +10,36 @@ function levelSelect:initialize()
 end
 
 function levelSelect:update(dt)
-    if CONTROLS[1]:pressed("left") and self.level > 0 then
-        self.level = self.level - 1
+    if CONTROLS[1]:pressed("left") then
+        if self.level > 0 then
+            self.level = self.level - 1
+        end
+
+        audioManager.play("menu_move")
     end
 
-    if CONTROLS[1]:pressed("right") and self.level < 9 then
-        self.level = self.level + 1
+    if CONTROLS[1]:pressed("right") then
+        if self.level < 9 then
+            self.level = self.level + 1
+        end
+
+        audioManager.play("menu_move")
     end
 
-    if CONTROLS[1]:pressed("down") and self.level < 5 then
-        self.level = self.level + 5
+    if CONTROLS[1]:pressed("down") then
+        if self.level < 5 then
+            self.level = self.level + 5
+        end
+
+        audioManager.play("menu_move")
     end
 
-    if CONTROLS[1]:pressed("up") and self.level > 4 then
-        self.level = self.level - 5
+    if CONTROLS[1]:pressed("up") then
+        if self.level > 4 then
+            self.level = self.level - 5
+        end
+
+        audioManager.play("menu_move")
     end
 
     if CONTROLS[1]:pressed("start") then
@@ -69,6 +86,7 @@ function levelSelect:startGame()
     end
 
     GAMESTATE.switch(require("gamestates.game.type_a"):new(), level)
+    audioManager.play("menu_select")
 end
 
 return levelSelect

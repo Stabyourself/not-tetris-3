@@ -3,7 +3,7 @@ local audioManager3 = {}
 function audioManager3.load()
     audioManager3.sources = {}
 
-    local audioList = {"clear", "move", "place", "topout", "turn", "tetris", "level"}
+    local audioList = {"clear", "move", "place", "topout", "turn", "tetris", "level", "menu_move", "menu_select"}
 
     for _, name in ipairs(audioList) do
         audioManager3.sources[name] = love.audio.newSource("audio/" .. name .. ".ogg", "static")
