@@ -62,7 +62,10 @@ function Playfield:initialize(game, x, y, columns, rows, player, randomizer, mir
     self:nextPiece(true)
 
     self.firstPieceWait = true
-    TIMER.setTimer(function() self.firstPieceWait = false end, FIRSTPIECEWAITTIME)
+    TIMER.setTimer(function()
+        self.firstPieceWait = false
+        self.activePiece.body:setAwake(true)
+    end, FIRSTPIECEWAITTIME)
 
     self:updateLines()
 end
