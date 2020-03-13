@@ -47,17 +47,17 @@ function love.load()
     love.resize(love.graphics.getDimensions())
 
     -- aight cool let's go
-    -- local intro = require("gamestates.intro.intro"):new(WIDTH, HEIGHT, 1)
+    local intro = require("gamestates.intro.intro"):new(WIDTH, HEIGHT, 1)
 
-    -- intro.onFinish = function()
-    --     game.background.active = true
-    --     GAMESTATE.switch(require("gamestates.game.type_a"):new())
-    -- end
+    intro.onFinish = function()
+        game.background.active = true
+        GAMESTATE.switch(require("gamestates.menu.levelSelect"):new())
+    end
 
-    -- game.background.active = false
-    -- GAMESTATE.switch(intro)
+    game.background.active = false
+    GAMESTATE.switch(intro)
 
-    GAMESTATE.switch(require("gamestates.menu.levelSelect"):new())
+    -- GAMESTATE.switch(require("gamestates.menu.levelSelect"):new())
 end
 
 function love.resize(w, h)
