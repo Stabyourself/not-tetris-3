@@ -482,7 +482,11 @@ function Playfield:checkClearRow()
 
         -- check level
         if math.floor(self.lines/10) > math.floor(oldLines/10) then
-            self:changeLevel(math.floor(self.lines/10))
+            local toLevel = math.floor(self.lines/10)
+
+            if toLevel > self.level then
+                self:changeLevel(toLevel)
+            end
         end
 
         -- add score
