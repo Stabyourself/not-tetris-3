@@ -54,10 +54,9 @@ function love.load()
         GAMESTATE.switch(require("gamestates.menu.levelSelect"):new())
     end
 
-    game.background.active = false
-    GAMESTATE.switch(intro)
+    -- GAMESTATE.switch(intro)
 
-    -- GAMESTATE.switch(require("gamestates.menu.levelSelect"):new())
+    GAMESTATE.switch(require("gamestates.game.type_a"):new())
 end
 
 function love.resize(w, h)
