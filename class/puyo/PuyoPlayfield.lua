@@ -1,0 +1,181 @@
+local _Playfield = require "class._Playfield"
+local Puyo = require "class.puyo.Puyo"
+local audioManager = require "lib.audioManager3"
+
+local Wall = require "class.Wall"
+
+local PuyoPlayfield = CLASS("PuyoPlayfield", _Playfield)
+
+function PuyoPlayfield:initialize(game, x, y, columns, rows, player)
+    self.game = game
+    self.x = x
+    self.y = y
+    self.columns = columns
+    self.rows = rows
+    self.player = player
+
+    self.colors = {
+        {1, 0, 0},
+        {0, 1, 0},
+        {0, 0, 1},
+        {1, 1, 0},
+        {1, 0, 1}
+    }
+    self.queuedGarbage = 0
+
+    self.world = love.physics.newWorld(0, GRAVITY)
+    self.world:setCallbacks(function() end, function() end, function() end, self.postSolve)
+
+    self.walls = {}
+    self.walls.left = Wall:new(self.world, 0, -WALLEXTEND*PHYSICSSCALE, 0, (self.rows+WALLEXTEND)*PHYSICSSCALE, WALLFRICTION) -- left
+    self.walls.right = Wall:new(self.world, self.columns*PHYSICSSCALE, -WALLEXTEND*PHYSICSSCALE, 0, (self.rows+WALLEXTEND)*PHYSICSSCALE, WALLFRICTION) -- right
+    self.walls.bottom = Wall:new(self.world, 0, self.rows*PHYSICSSCALE, self.columns*PHYSICSSCALE, 0, FLOORFRICTION) -- floor
+
+    self.walls.left.dontDrop = true
+    self.walls.right.dontDrop = true
+
+    self.paused = false
+    self.puyoEnded = false
+
+    self.worldUpdateBuffer = WORLDUPDATEINTERVAL
+
+    self.puyos = {}
+
+    self:nextPuyo()
+end
+
+function PuyoPlayfield:update(dt)
+    self.worldUpdateBuffer = self.worldUpdateBuffer + dt
+
+    -- world is updated in fixed steps to prevent fps-dependency (box2d behaves differently with different deltas, even if the total is the same)
+    while self.worldUpdateBuffer >= WORLDUPDATEINTERVAL do
+        -- Movement
+        if self.activePuyo then
+            -- Rotation
+            -- if self.player:down("rotate_left") then
+            --     self.activePuyo:rotate(-1)
+
+            --     if self.player:pressed("rotate_left") then
+            --         audioManager.play("turn")
+            --     end
+            -- end
+
+            -- if self.player:down("rotate_right") then
+            --     self.activePuyo:rotate(1)
+
+            --     if self.player:pressed("rotate_right") then
+            --         audioManager.play("turn")
+            --     end
+            -- end
+
+            -- Horizontal movement
+            if self.player:down("left") then
+                self.activePuyo:move(-1)
+
+                if self.player:pressed("left") then
+                    audioManager.play("move")
+                end
+            end
+
+            if self.player:down("right") then
+                self.activePuyo:move(1)
+
+                if self.player:pressed("right") then
+                    audioManager.play("move")
+                end
+            end
+
+            -- vertical movement
+            if not self.player:down("down") then
+                self.activePuyo:limitDownwardVelocity()
+            end
+        end
+
+        self.world:update(WORLDUPDATEINTERVAL)
+
+        self.worldUpdateBuffer = self.worldUpdateBuffer - WORLDUPDATEINTERVAL
+    end
+
+    if self.spawnNewPuyoNextFrame then
+        self.spawnNewPuyoNextFrame = false
+        self:nextPuyo()
+    end
+end
+
+function PuyoPlayfield:draw()
+    love.graphics.push()
+    love.graphics.translate(self.x, self.y)
+
+    local x1, y1 = game.camera:cameraCoords(self.x, self.y)
+    local x2, y2 = game.camera:cameraCoords(self.x + self.columns*BLOCKSCALE, self.y + self.rows*BLOCKSCALE)
+
+    local x = math.ceil(x1)
+    local y = math.ceil(y1)
+    local w = math.ceil(x2-x1)
+    local h = math.ceil(y2-y1)
+
+    love.graphics.setScissor(x, y, w, h)
+
+    for _, v in ipairs(self.puyos) do
+        v:draw()
+    end
+
+    love.graphics.pop()
+    love.graphics.setScissor()
+end
+
+function PuyoPlayfield:gameOver()
+    self.dead = true
+    self.activePuyo = false
+    self.walls.bottom.body:destroy()
+    if self.game.topOut then
+        self.game:topOut(self)
+    end
+end
+
+function PuyoPlayfield.postSolve(a, b)
+    local aObject = a:getBody():getUserData()
+    local bObject = b:getBody():getUserData()
+    local otherObject
+
+    local puyo = false
+
+    if aObject and aObject:isInstanceOf(Puyo) and aObject == aObject.playfield.activePuyo then
+        puyo = aObject
+        otherObject = bObject
+    end
+
+    if bObject and bObject:isInstanceOf(Puyo) and bObject == bObject.playfield.activePuyo then
+        puyo = bObject
+        otherObject = aObject
+    end
+
+    if puyo and not otherObject.dontDrop then
+        local self = puyo.playfield
+
+        -- some velocity check here maybe
+
+        if puyo.body:getY() < PIECESTARTY+1 then
+            self:gameOver()
+            return
+        end
+
+        self.activePuyo = false
+        self.puyoEnded = true
+        self.spawnNewPuyoNextFrame = true
+    end
+end
+
+function PuyoPlayfield:nextPuyo()
+    local puyo = Puyo:new(self, self.colors[love.math.random(#self.colors)])
+
+    self.activePuyo = puyo
+
+    table.insert(self.puyos, puyo)
+end
+
+function PuyoPlayfield:getMaxSpeedY()
+    return 400
+end
+
+return PuyoPlayfield

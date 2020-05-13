@@ -17,6 +17,8 @@ for i = 1, 3 do
 end
 
 function TetrisPlayfield:initialize(game, x, y, columns, rows, player, randomizer, mirrored, blockGraphicsPack, level)
+    _Playfield.initialize(self)
+
     self.game = game
     self.x = x
     self.y = y
@@ -338,38 +340,6 @@ function TetrisPlayfield:changeLevel(level)
     self.level = level
 end
 
-function TetrisPlayfield:sendGarbage(count)
-    if self.queuedGarbage < count then
-        count = count - self.queuedGarbage
-        self.queuedGarbage = 0
-    else
-        self.queuedGarbage = self.queuedGarbage - count
-        count = 0
-    end
-
-    if count > 0 then
-        self.game:sendGarbage(self, count)
-    end
-end
-
-function TetrisPlayfield:receiveGarbage(count)
-    self.queuedGarbage = self.queuedGarbage + count
-end
-
-function TetrisPlayfield:checkGarbageSpawn()
-    if self.queuedGarbage > 0 then -- oh no
-        local garbageWaitTime = GARBAGEWAITTIME + GARBAGEWAITTIMEPERROW * self.queuedGarbage
-
-        self:spawnGarbage(self.queuedGarbage)
-        self.queuedGarbage = 0
-        self.pieceSpawnTimer = 0
-
-        TIMER.setTimer(function() self.spawnNewPieceNextFrame = true end, garbageWaitTime)
-    else
-        self.spawnNewPieceNextFrame = true
-    end
-end
-
 local garbageShapes1 = {}
 for i = 0, 2 do
     garbageShapes1[i+1] = {
@@ -400,8 +370,6 @@ for i = 0, 2 do
 end
 
 function TetrisPlayfield:spawnGarbage(count)
-    local y = 1
-
     for garbageNum = 1, count do
         local y = math.ceil(garbageNum/4)
         local x = garbageNum%4+1
