@@ -1,11 +1,13 @@
-local Playfield = CLASS("Playfield")
+local _Playfield = require "class._Playfield"
+local TetrisPlayfield = CLASS("TetrisPlayfield", _Playfield)
 local audioManager = require "lib.audioManager3"
 
 local Wall = require "class.Wall"
 local Piece = require "class.tetris.Piece"
 local ClearAnimation = require "class.tetris.ClearAnimation"
 local pieceTypes = require "class.tetris.PieceType"
-local FillGuide = require "class.tetris.FillGuide"
+local NextPieceContainer = require "class.tetris.NextPieceContainer"
+local FillGuideContainer = require "class.tetris.FillGuideContainer"
 
 
 local blockQuads = {}
@@ -14,7 +16,9 @@ for i = 1, 3 do
     blockQuads[i] = love.graphics.newQuad((i-1)*10+1, 1, 8, 8, 30, 10)
 end
 
-function Playfield:initialize(game, x, y, columns, rows, player, randomizer, mirrored, blockGraphicsPack, level)
+function TetrisPlayfield:initialize(game, x, y, columns, rows, player, randomizer, mirrored, blockGraphicsPack, level)
+    _Playfield.initialize(self)
+
     self.game = game
     self.x = x
     self.y = y
@@ -53,10 +57,8 @@ function Playfield:initialize(game, x, y, columns, rows, player, randomizer, mir
     self.paused = false
     self.pieceEnded = false
 
-    self.fillGuides = {}
-    for row = 1, self.rows do
-        self.fillGuides[row] = FillGuide:new()
-    end
+    self.fillGuideContainer = FillGuideContainer:new(self, -11, 0, 8)
+    self.nextPieceContainer = NextPieceContainer:new(self, 0, 0)
 
     self.pieces = {}
     self:nextPiece(true)
@@ -70,9 +72,9 @@ function Playfield:initialize(game, x, y, columns, rows, player, randomizer, mir
     self:updateLines()
 end
 
-function Playfield:update(dt)
+function TetrisPlayfield:update(dt)
     util.updateGroup(self.clearAnimations, dt)
-    util.updateGroup(self.fillGuides, dt)
+    self.fillGuideContainer:update(dt)
 
     if self.paused then
         return
@@ -163,39 +165,15 @@ function Playfield:update(dt)
     end
 end
 
-function Playfield:draw()
+function TetrisPlayfield:draw()
     love.graphics.push()
     love.graphics.translate(self.x, self.y)
 
     -- next
-    if self.nextPieceX then
-        love.graphics.push()
-        love.graphics.translate(self.nextPieceX, self.nextPieceY)
-
-        local pieceType = pieceTypes[self.randomizer:getPiece(self.piececount+1, self.mirrored)]
-        for x = 1, #pieceType.map do
-            for y = 1, #pieceType.map[x] do
-                if pieceType.map[x][y] then
-                    local rx = x-1-#pieceType.map/2
-                    local ry = y-1-#pieceType.map[x]/2
-
-                    love.graphics.draw(self:getBlockGraphic(), blockQuads[pieceType.map[x][y]], rx*BLOCKSCALE, ry*BLOCKSCALE)
-                end
-            end
-        end
-
-        love.graphics.pop()
-    end
+    self.nextPieceContainer:draw()
 
     -- fullness
-    if self.areaIndicatorsX then
-        for row = 1, self.rows do
-            local x = self.areaIndicatorsX
-            local y = self.areaIndicatorsY + (row-1)*BLOCKSCALE
-
-            self.fillGuides[row]:draw(x, y, self.areaIndicatorsWidth)
-        end
-    end
+    self.fillGuideContainer:draw()
 
     -- overlay
     if self.rowOverlay then
@@ -242,19 +220,19 @@ function Playfield:draw()
     love.graphics.setScissor()
 end
 
-function Playfield:worldToRow(y)
+function TetrisPlayfield:worldToRow(y)
     return math.floor(y/PHYSICSSCALE)+1
 end
 
-function Playfield:rowToWorld(y)
+function TetrisPlayfield:rowToWorld(y)
     return y*PHYSICSSCALE
 end
 
-function Playfield:getBlockGraphic()
+function TetrisPlayfield:getBlockGraphic()
     return self.blockGraphicsPack:getGraphic(self.level)
 end
 
-function Playfield:getMaxSpeedY()
+function TetrisPlayfield:getMaxSpeedY()
     local speed = MAXSPEEDYBASE + MAXSPEEDYPERLEVEL*self.level
 
     if self.firstPieceWait then
@@ -264,13 +242,13 @@ function Playfield:getMaxSpeedY()
     return speed
 end
 
-function Playfield:addArea(row, area)
+function TetrisPlayfield:addArea(row, area)
     if row > 0 and row <= self.rows then
         self.area[row] = self.area[row] + area
     end
 end
 
-function Playfield:updateLines()
+function TetrisPlayfield:updateLines()
     for row = 1, self.rows do
         self.area[row] = 0
     end
@@ -291,12 +269,12 @@ function Playfield:updateLines()
             mul = 1
         end
 
-        self.fillGuides[row]:smoothSet(math.min(1, self.area[row]/(math.floor(self.columns)*BLOCKSIZE*LINECLEARREQUIREMENT))*mul)
+        self.fillGuideContainer.fillGuides[row]:smoothSet(math.min(1, self.area[row]/(math.floor(self.columns)*BLOCKSIZE*LINECLEARREQUIREMENT))*mul)
     end
 
 end
 
-function Playfield:nextPiece(first)
+function TetrisPlayfield:nextPiece(first)
     self.piececount = self.piececount + 1
     local pieceNum = self.randomizer:getPiece(self.piececount, self.mirrored)
     local piece = Piece.fromPieceType(self, pieceTypes[pieceNum])
@@ -308,9 +286,12 @@ function Playfield:nextPiece(first)
     self.activePiece = piece
 
     table.insert(self.pieces, piece)
+
+    -- update NEXT
+    self.nextPieceContainer.pieceType = pieceTypes[self.randomizer:getPiece(self.piececount+1, self.mirrored)]
 end
 
-function Playfield:gameOver()
+function TetrisPlayfield:gameOver()
     self.dead = true
     self.activePiece = false
     self.walls.bottom.body:destroy()
@@ -319,7 +300,7 @@ function Playfield:gameOver()
     end
 end
 
-function Playfield.postSolve(a, b)
+function TetrisPlayfield.postSolve(a, b)
     local aObject = a:getBody():getUserData()
     local bObject = b:getBody():getUserData()
     local otherObject
@@ -351,44 +332,12 @@ function Playfield.postSolve(a, b)
     end
 end
 
-function Playfield:addPiece(piece)
+function TetrisPlayfield:addPiece(piece)
     table.insert(self.pieces, piece)
 end
 
-function Playfield:changeLevel(level)
+function TetrisPlayfield:changeLevel(level)
     self.level = level
-end
-
-function Playfield:sendGarbage(count)
-    if self.queuedGarbage < count then
-        count = count - self.queuedGarbage
-        self.queuedGarbage = 0
-    else
-        self.queuedGarbage = self.queuedGarbage - count
-        count = 0
-    end
-
-    if count > 0 then
-        self.game:sendGarbage(self, count)
-    end
-end
-
-function Playfield:receiveGarbage(count)
-    self.queuedGarbage = self.queuedGarbage + count
-end
-
-function Playfield:checkGarbageSpawn()
-    if self.queuedGarbage > 0 then -- oh no
-        local garbageWaitTime = GARBAGEWAITTIME + GARBAGEWAITTIMEPERROW * self.queuedGarbage
-
-        self:spawnGarbage(self.queuedGarbage)
-        self.queuedGarbage = 0
-        self.pieceSpawnTimer = 0
-
-        TIMER.setTimer(function() self.spawnNewPieceNextFrame = true end, garbageWaitTime)
-    else
-        self.spawnNewPieceNextFrame = true
-    end
 end
 
 local garbageShapes1 = {}
@@ -420,9 +369,7 @@ for i = 0, 2 do
     }
 end
 
-function Playfield:spawnGarbage(count)
-    local y = 1
-
+function TetrisPlayfield:spawnGarbage(count)
     for garbageNum = 1, count do
         local y = math.ceil(garbageNum/4)
         local x = garbageNum%4+1
@@ -444,11 +391,11 @@ function Playfield:spawnGarbage(count)
     end
 end
 
-function Playfield:clearRow(rows)
+function TetrisPlayfield:clearRow(rows)
     self.paused = true
     for _, row in ipairs(rows) do
         table.insert(self.clearAnimations, ClearAnimation:new(self, row))
-        self.fillGuides[row]:smoothSet(0)
+        self.fillGuideContainer.fillGuides[row]:smoothSet(0)
     end
 
     TIMER.setTimer(function()
@@ -461,7 +408,7 @@ function Playfield:clearRow(rows)
     end, LINECLEARTIME)
 end
 
-function Playfield:checkClearRow()
+function TetrisPlayfield:checkClearRow()
     self:updateLines()
     local toClear = {}
     local totalFactor = 0
@@ -523,4 +470,4 @@ function Playfield:checkClearRow()
     end
 end
 
-return Playfield
+return TetrisPlayfield

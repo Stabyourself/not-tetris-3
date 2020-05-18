@@ -74,6 +74,7 @@ end
 function intro:enter()
     self.state = 1
     self.timer = 0
+    game.background.active = false
 end
 
 function intro:update(dt)

@@ -1,13 +1,16 @@
-local Piece = CLASS("Piece")
+local Puyo = CLASS("Puyo")
 
-local Block = require "class.tetris.Block"
+Puyo.size = 10/6 / 2 -- radius
 
-function Piece:initialize(playfield)
+Puyo.shape = love.physics.newCircleShape(Puyo.size*PHYSICSSCALE)
+
+function Puyo:initialize(playfield, color)
     self.playfield = playfield
-
-    self.blocks = {}
+    self.color = color
 
     self.body = love.physics.newBody(playfield.world, PIECESTARTX, PIECESTARTY, "dynamic")
+    self.fixture = love.physics.newFixture(self.body, self.shape)
+
     self.body:setUserData(self)
     self.body:setAngle(0)
     -- self.body:setBullet(true)
@@ -16,42 +19,8 @@ function Piece:initialize(playfield)
     self.active = true
 end
 
---- Returns a piece from a piece type (like, T or O)
-function Piece.fromPieceType(playfield, pieceType)
-    local piece = Piece:new(playfield)
-
-    for x = 1, #pieceType.map do
-        for y = 1, #pieceType.map[x] do
-            if pieceType.map[x][y] then
-                local rx = x-1-#pieceType.map/2
-                local ry = y-1-#pieceType.map[x]/2
-
-                local shape = love.physics.newRectangleShape((rx+.5)*PHYSICSSCALE, (ry+.5)*PHYSICSSCALE, PHYSICSSCALE, PHYSICSSCALE)
-
-                local block = Block:new(piece, shape, rx, ry, playfield:getBlockGraphic(), pieceType.map[x][y])
-                table.insert(piece.blocks, block)
-            end
-        end
-    end
-
-    return piece
-end
-
---- Returns a piece from a list of shapes
-function Piece.fromShapes(playfield, shapes)
-    local piece = Piece:new(playfield)
-
-    for _, shape in ipairs(shapes) do
-        local b2shape = love.physics.newPolygonShape(shape.shape)
-        local block = Block:new(piece, b2shape, shape.x, shape.y, shape.img, shape.quadI)
-        table.insert(piece.blocks, block)
-    end
-
-    return piece
-end
-
 --- Stops the piece from falling too fast, based on the level usually
-function Piece:limitDownwardVelocity()
+function Puyo:limitDownwardVelocity()
     local speedX, speedY = self.body:getLinearVelocity()
 
     if speedY > self.playfield:getMaxSpeedY() then
@@ -59,35 +28,30 @@ function Piece:limitDownwardVelocity()
     end
 end
 
-function Piece:draw()
+function Puyo:draw()
     love.graphics.push()
     love.graphics.scale(1/PHYSICSSCALE*BLOCKSCALE, 1/PHYSICSSCALE*BLOCKSCALE)
     love.graphics.translate(self.body:getPosition())
     love.graphics.rotate(self.body:getAngle())
 
-    for _, block in ipairs(self.blocks) do
-        block:draw()
-    end
-
-    for _, block in ipairs(self.blocks) do
-        block:debugDraw()
-    end
+    love.graphics.setColor(self.color)
+    love.graphics.circle("fill", 0, 0, self.size*PHYSICSSCALE)
 
     love.graphics.setColor(1, 1, 1)
 
     love.graphics.pop()
 end
 
-function Piece:move(dir)
+function Puyo:move(dir)
     self.body:applyForce(MOVEFORCE*dir, 0)
 end
 
-function Piece:rotate(dir)
+function Puyo:rotate(dir)
     self.body:applyTorque(ROTATEFORCE*dir, 0)
 end
 
 --- Cuts a piece in rows
-function Piece:cut(rows)
+function Puyo:cut(rows)
     for i = #self.blocks, 1, -1 do
         self.blocks[i]:cut(rows)
     end
@@ -103,7 +67,7 @@ function Piece:cut(rows)
 end
 
 --- Handles blocks that are no longer connected, creating new pieces as required
-function Piece:separateBlocks()
+function Puyo:separateBlocks()
     local shapes = {}
 
     for _, block in ipairs(self.blocks) do
@@ -204,15 +168,24 @@ function Piece:separateBlocks()
                 })
             end
 
-            local piece = Piece.fromShapes(self.playfield, createShapes)
+            local piece = Puyo.fromShapes(self.playfield, createShapes)
             piece.body:setPosition(self.body:getPosition())
             piece.body:setAngle(self.body:getAngle())
             piece.body:setAngularVelocity(self.body:getAngularVelocity())
             piece.body:setLinearVelocity(self.body:getLinearVelocity())
 
-            self.playfield:addPiece(piece)
+            self.playfield:addPuyo(piece)
         end
     end
 end
 
-return Piece
+function Puyo:move(dir)
+    self.body:applyForce(MOVEFORCE*dir, 0)
+end
+
+function Puyo:rotate(dir)
+    self.body:applyTorque(ROTATEFORCE*dir, 0)
+end
+
+
+return Puyo
