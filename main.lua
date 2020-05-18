@@ -8,10 +8,6 @@ function love.load()
     game = {} -- container of evil globals
     require "variables"
 
-    if FIXEDRNG then
-        love.math.setRandomSeed(2)
-    end
-
     love.graphics.setDefaultFilter("nearest", "nearest")
 
     love.graphics.setLineWidth(1)

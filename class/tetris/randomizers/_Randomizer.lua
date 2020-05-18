@@ -6,6 +6,13 @@ local mirrorTable = {
 
 function Randomizer:initialize()
     self.list = {}
+
+    local seed = love.timer.getTime()
+    if FIXEDRNG then
+        seed = 5450
+    end
+
+    self.randomizer = love.math.newRandomGenerator(seed)
 end
 
 function Randomizer:getPiece(i, mirrored)
@@ -21,6 +28,11 @@ function Randomizer:getPiece(i, mirrored)
     end
 
     return piece
+end
+
+function Randomizer:generatePiece()
+    error("_Randomizer was used to generate a piece. This shouldn't happen.")
+    return 4 -- guaranteed to be random.
 end
 
 function Randomizer:getLastPiece()

@@ -7,7 +7,7 @@ function NESRandomizer:generatePiece()
     local tried = 0
 
     repeat
-        piece = love.math.random(1, 7)
+        piece = self.randomizer:random(1, 7)
         tried = tried + 1
     until piece ~= self:getLastPiece() or tried == 2
 
