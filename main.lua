@@ -10,7 +10,7 @@ function love.load()
 
     love.graphics.setDefaultFilter("nearest", "nearest")
 
-    love.graphics.setLineWidth(1)
+    love.graphics.setLineWidth(4)
 
     love.physics.setMeter(METER)
 

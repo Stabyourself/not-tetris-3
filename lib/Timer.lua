@@ -1,4 +1,4 @@
-Timer = CLASS("Timer")
+local Timer = CLASS("Timer")
 
 local timers = {}
 

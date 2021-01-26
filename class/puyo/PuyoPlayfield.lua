@@ -38,14 +38,17 @@ function PuyoPlayfield:initialize(game, x, y, columns, rows, player)
     self.puyoEnded = false
 
     self.worldUpdateBuffer = WORLDUPDATEINTERVAL
+    self.puyoGroupUpdateBuffer = 0
 
     self.puyos = {}
+    self.puyoGroups = {}
 
     self:nextPuyo()
 end
 
 function PuyoPlayfield:update(dt)
     self.worldUpdateBuffer = self.worldUpdateBuffer + dt
+    self.puyoGroupUpdateBuffer = self.puyoGroupUpdateBuffer + dt
 
     -- world is updated in fixed steps to prevent fps-dependency (box2d behaves differently with different deltas, even if the total is the same)
     while self.worldUpdateBuffer >= WORLDUPDATEINTERVAL do
@@ -94,11 +97,18 @@ function PuyoPlayfield:update(dt)
         self.world:update(WORLDUPDATEINTERVAL)
 
         self.worldUpdateBuffer = self.worldUpdateBuffer - WORLDUPDATEINTERVAL
+
+        if self.puyoGroupUpdateBuffer > PUYOGROUPUPDATEINTERVAL then
+            self:updatePuyoGroups()
+
+            self.puyoGroupUpdateBuffer = self.puyoGroupUpdateBuffer%PUYOGROUPUPDATEINTERVAL
+        end
     end
 
-    if self.spawnNewPuyoNextFrame then
-        self.spawnNewPuyoNextFrame = false
-        self:nextPuyo()
+    if self.puyoEnded then
+        self.puyoEnded = false
+
+        self:checkClearPuyos()
     end
 end
 
@@ -116,12 +126,85 @@ function PuyoPlayfield:draw()
 
     love.graphics.setScissor(x, y, w, h)
 
+    love.graphics.scale(1/PHYSICSSCALE*BLOCKSCALE, 1/PHYSICSSCALE*BLOCKSCALE)
+
     for _, v in ipairs(self.puyos) do
         v:draw()
     end
 
     love.graphics.pop()
     love.graphics.setScissor()
+end
+
+function PuyoPlayfield:updatePuyoGroups()
+    local colorGroups = {}
+
+    for i = 1, #self.colors do
+        colorGroups[i] = {}
+    end
+
+    for _, puyo in ipairs(self.puyos) do
+        -- clear closeness
+        puyo.neighbouringPuyos = {}
+
+        -- make groups
+        table.insert(colorGroups[puyo.group],
+            {
+                puyo=puyo,
+                recursed=false,
+            }
+        )
+    end
+
+    local groups = {}
+
+    for _, colorGroup in ipairs(colorGroups) do
+        -- work through puyos until we have no puyos :(
+        for j = 1, #colorGroup do
+            if not colorGroup[j].recursed then
+                -- make a new group
+                local group = {}
+
+                local function recursiveGrouping(puyo)
+                    table.insert(group, puyo)
+
+                    -- check for close puyos
+                    for i = 1, #colorGroup do
+                        if i ~= j then
+                            local otherPuyo = colorGroup[i].puyo
+
+                            local x1, y1 = puyo.body:getPosition()
+                            local x2, y2 = otherPuyo.body:getPosition()
+
+                            local distance = util.distance(x1, y1, x2, y2)
+
+                            if distance <= PUYODISTANCE then
+                                -- enter into some closeness cache for puyo
+                                puyo:insertNeighbour(otherPuyo)
+                                otherPuyo:insertNeighbour(puyo)
+
+                                if not colorGroup[i].recursed then
+                                    -- throw close puyo into our group
+                                    colorGroup[i].recursed = true
+                                    recursiveGrouping(otherPuyo)
+                                end
+                            end
+                        end
+                    end
+                end
+
+                colorGroup[j].recursed = true
+                recursiveGrouping(colorGroup[j].puyo)
+
+                -- add group to groups if more than 1 member
+                if #group > 1 then
+                    table.insert(groups, group)
+                end
+            end
+        end
+    end
+
+    self.puyoGroups = groups
 end
 
 function PuyoPlayfield:gameOver()
@@ -162,12 +245,34 @@ function PuyoPlayfield.postSolve(a, b)
 
         self.activePuyo = false
         self.puyoEnded = true
-        self.spawnNewPuyoNextFrame = true
+    end
+end
+
+function PuyoPlayfield:checkClearPuyos()
+    local puyosDestroyed = false
+
+    self:updatePuyoGroups()
+
+    for _, group in ipairs(self.puyoGroups) do
+        if #group >= 4 then
+            for _, puyo in ipairs(group) do
+                puyo:destroy()
+            end
+
+            puyosDestroyed = true
+        end
+    end
+
+    if puyosDestroyed then
+        util.updateGroup(self.puyos)
+        TIMER.setTimer(function() self:checkClearPuyos() end, PUYOCHAINTIME)
+    else
+        self:nextPuyo()
     end
 end
 
 function PuyoPlayfield:nextPuyo()
-    local puyo = Puyo:new(self, self.colors[love.math.random(#self.colors)])
+    local puyo = Puyo:new(self, love.math.random(#self.colors))
 
     self.activePuyo = puyo
 
@@ -175,7 +280,7 @@ function PuyoPlayfield:nextPuyo()
 end
 
 function PuyoPlayfield:getMaxSpeedY()
-    return 400
+    return 100
 end
 
 return PuyoPlayfield
