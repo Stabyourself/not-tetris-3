@@ -1,20 +1,24 @@
 local Puyo = CLASS("Puyo")
 
 Puyo.size = 10/6 / 2 -- radius
-
 Puyo.shape = love.physics.newCircleShape(Puyo.size*PHYSICSSCALE)
 
-function Puyo:initialize(playfield, group)
-    self.playfield = playfield
-    self.group = group
+local diameter = Puyo.size*PHYSICSSCALE*2
 
-    self.body = love.physics.newBody(playfield.world, PIECESTARTX, PIECESTARTY, "dynamic")
-    self.fixture = love.physics.newFixture(self.body, self.shape)
+function Puyo:initialize(playfield, type, offsetX, offsetY, group)
+    self.playfield = playfield
+    self.type = type
+
+    self.group = group
+    self.body = group.body
+
+    Puyo.shape:setPoint((offsetX or 0)*diameter, (offsetY or 0)*diameter)
+    self.fixture = love.physics.newFixture(self.body, Puyo.shape)
     self.fixture:setFriction(1)
+    self.fixture:setRestitution(0.5)
 
     self.body:setUserData(self)
     self.body:setAngle(0)
-    -- self.body:setBullet(true)
 
     self.body:setLinearVelocity(0, self.playfield:getMaxSpeedY())
     self.active = true
@@ -39,21 +43,24 @@ function Puyo:draw()
     love.graphics.push()
     love.graphics.translate(self.body:getPosition())
     love.graphics.rotate(self.body:getAngle())
+    love.graphics.translate(self.fixture:getShape():getPoint())
 
-    love.graphics.setColor(self.playfield.colors[self.group])
+    love.graphics.setColor(self.playfield.colors[self.type])
     love.graphics.circle("fill", 0, 0, self.size*PHYSICSSCALE)
-
-    love.graphics.setColor(1, 1, 1)
 
     love.graphics.pop()
 
     -- puyo group debug
     for _, neighbouringPuyo in ipairs(self.neighbouringPuyos) do
-        local x1, y1 = self.body:getPosition()
-        local x2, y2 = neighbouringPuyo.body:getPosition()
+        local x1, y1 = self.body:getWorldPoint(self.fixture:getShape():getPoint())
+
+        love.graphics.setLineWidth(30*(1-(neighbouringPuyo.distance-diameter) / (PUYODISTANCE-diameter) ))
+        local x2, y2 = neighbouringPuyo.puyo.body:getWorldPoint(neighbouringPuyo.puyo.fixture:getShape():getPoint())
 
         love.graphics.line(x1, y1, x2, y2)
     end
+
+    love.graphics.setColor(1, 1, 1)
 end
 
 function Puyo:move(dir)
@@ -61,17 +68,30 @@ function Puyo:move(dir)
 end
 
 function Puyo:rotate(dir)
-    self.body:applyTorque(ROTATEFORCE*dir, 0)
+    if dir == 1 then
+        if self.body:getAngularVelocity() < PUYOMAXROTATESPEED then
+            self.body:applyTorque(PUYOROTATEFORCE*dir, 0)
+        end
+    elseif dir == -1 then
+        if self.body:getAngularVelocity() > -PUYOMAXROTATESPEED then
+            self.body:applyTorque(PUYOROTATEFORCE*dir, 0)
+        end
+    end
 end
 
-function Puyo:insertNeighbour(neighbouringPuyo)
+function Puyo:insertNeighbour(neighbouringPuyo, distance)
     for _, checkingPuyo in ipairs(self.neighbouringPuyos) do
-        if checkingPuyo == neighbouringPuyo then
+        if checkingPuyo.puyo == neighbouringPuyo then
             return
         end
     end
 
-    table.insert(self.neighbouringPuyos, neighbouringPuyo)
+    table.insert(self.neighbouringPuyos,
+        {
+            puyo=neighbouringPuyo,
+            distance=distance,
+        }
+    )
 end
 
 function Puyo:destroy()

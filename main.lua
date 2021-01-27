@@ -1,7 +1,6 @@
 local preDraw
 local postDraw
 local background
-local camera
 
 function love.load()
     -- general setup

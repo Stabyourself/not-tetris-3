@@ -1,5 +1,6 @@
 local _Playfield = require "class._Playfield"
 local Puyo = require "class.puyo.Puyo"
+local PuyoGroup = require "class.puyo.PuyoGroup"
 local audioManager = require "lib.audioManager3"
 
 local Wall = require "class.Wall"
@@ -53,27 +54,33 @@ function PuyoPlayfield:update(dt)
     -- world is updated in fixed steps to prevent fps-dependency (box2d behaves differently with different deltas, even if the total is the same)
     while self.worldUpdateBuffer >= WORLDUPDATEINTERVAL do
         -- Movement
-        if self.activePuyo then
+        if self.activePuyoGroup then
             -- Rotation
-            -- if self.player:down("rotate_left") then
-            --     self.activePuyo:rotate(-1)
+            if self.player:down("rotate_left") then
+                for _, puyo in ipairs(self.activePuyoGroup.puyos) do
+                    puyo:rotate(-1)
+                end
 
-            --     if self.player:pressed("rotate_left") then
-            --         audioManager.play("turn")
-            --     end
-            -- end
+                if self.player:pressed("rotate_left") then
+                    audioManager.play("turn")
+                end
+            end
 
-            -- if self.player:down("rotate_right") then
-            --     self.activePuyo:rotate(1)
+            if self.player:down("rotate_right") then
+                for _, puyo in ipairs(self.activePuyoGroup.puyos) do
+                    puyo:rotate(1)
+                end
 
-            --     if self.player:pressed("rotate_right") then
-            --         audioManager.play("turn")
-            --     end
-            -- end
+                if self.player:pressed("rotate_right") then
+                    audioManager.play("turn")
+                end
+            end
 
             -- Horizontal movement
             if self.player:down("left") then
-                self.activePuyo:move(-1)
+                for _, puyo in ipairs(self.activePuyoGroup.puyos) do
+                    puyo:move(-1)
+                end
 
                 if self.player:pressed("left") then
                     audioManager.play("move")
@@ -81,7 +88,9 @@ function PuyoPlayfield:update(dt)
             end
 
             if self.player:down("right") then
-                self.activePuyo:move(1)
+                for _, puyo in ipairs(self.activePuyoGroup.puyos) do
+                    puyo:move(1)
+                end
 
                 if self.player:pressed("right") then
                     audioManager.play("move")
@@ -90,7 +99,9 @@ function PuyoPlayfield:update(dt)
 
             -- vertical movement
             if not self.player:down("down") then
-                self.activePuyo:limitDownwardVelocity()
+                for _, puyo in ipairs(self.activePuyoGroup.puyos) do
+                    puyo:limitDownwardVelocity()
+                end
             end
         end
 
@@ -107,6 +118,9 @@ function PuyoPlayfield:update(dt)
 
     if self.puyoEnded then
         self.puyoEnded = false
+
+        self.activePuyoGroup:split()
+        self.activePuyoGroup = false
 
         self:checkClearPuyos()
     end
@@ -148,7 +162,7 @@ function PuyoPlayfield:updatePuyoGroups()
         puyo.neighbouringPuyos = {}
 
         -- make groups
-        table.insert(colorGroups[puyo.group],
+        table.insert(colorGroups[puyo.type],
             {
                 puyo=puyo,
                 recursed=false,
@@ -173,15 +187,15 @@ function PuyoPlayfield:updatePuyoGroups()
                         if i ~= j then
                             local otherPuyo = colorGroup[i].puyo
 
-                            local x1, y1 = puyo.body:getPosition()
-                            local x2, y2 = otherPuyo.body:getPosition()
+                            local x1, y1 = puyo.body:getWorldPoint(puyo.fixture:getShape():getPoint())
+                            local x2, y2 = otherPuyo.body:getWorldPoint(otherPuyo.fixture:getShape():getPoint())
 
                             local distance = util.distance(x1, y1, x2, y2)
 
                             if distance <= PUYODISTANCE then
                                 -- enter into some closeness cache for puyo
-                                puyo:insertNeighbour(otherPuyo)
-                                otherPuyo:insertNeighbour(puyo)
+                                puyo:insertNeighbour(otherPuyo, distance)
+                                otherPuyo:insertNeighbour(puyo, distance)
 
                                 if not colorGroup[i].recursed then
                                     -- throw close puyo into our group
@@ -209,7 +223,7 @@ end
 
 function PuyoPlayfield:gameOver()
     self.dead = true
-    self.activePuyo = false
+    self.activePuyoGroup = false
     self.walls.bottom.body:destroy()
     if self.game.topOut then
         self.game:topOut(self)
@@ -223,17 +237,17 @@ function PuyoPlayfield.postSolve(a, b)
 
     local puyo = false
 
-    if aObject and aObject:isInstanceOf(Puyo) and aObject == aObject.playfield.activePuyo then
+    if aObject and aObject:isInstanceOf(Puyo) and aObject.playfield.activePuyoGroup and table.includesI(aObject.playfield.activePuyoGroup.puyos, aObject) then
         puyo = aObject
         otherObject = bObject
     end
 
-    if bObject and bObject:isInstanceOf(Puyo) and bObject == bObject.playfield.activePuyo then
+    if bObject and bObject:isInstanceOf(Puyo) and bObject.playfield.activePuyoGroup and table.includesI(bObject.playfield.activePuyoGroup.puyos, bObject) then
         puyo = bObject
         otherObject = aObject
     end
 
-    if puyo and not otherObject.dontDrop then
+    if puyo and not otherObject.dontDrop and not table.includesI(puyo.playfield.activePuyoGroup.puyos, otherObject) then
         local self = puyo.playfield
 
         -- some velocity check here maybe
@@ -243,7 +257,6 @@ function PuyoPlayfield.postSolve(a, b)
             return
         end
 
-        self.activePuyo = false
         self.puyoEnded = true
     end
 end
@@ -272,15 +285,19 @@ function PuyoPlayfield:checkClearPuyos()
 end
 
 function PuyoPlayfield:nextPuyo()
-    local puyo = Puyo:new(self, love.math.random(#self.colors))
+    self.activePuyoGroup = PuyoGroup:new(self,
+        {
+            {love.math.random(#self.colors)},
+            {love.math.random(#self.colors)},
+        })
 
-    self.activePuyo = puyo
-
-    table.insert(self.puyos, puyo)
+    for _, puyo in ipairs(self.activePuyoGroup.puyos) do
+        table.insert(self.puyos, puyo)
+    end
 end
 
 function PuyoPlayfield:getMaxSpeedY()
-    return 100
+    return 400
 end
 
 return PuyoPlayfield
