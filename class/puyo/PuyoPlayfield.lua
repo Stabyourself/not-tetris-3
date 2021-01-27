@@ -2,26 +2,21 @@ local _Playfield = require "class._Playfield"
 local Puyo = require "class.puyo.Puyo"
 local PuyoGroup = require "class.puyo.PuyoGroup"
 local audioManager = require "lib.audioManager3"
+local NextPieceContainer = require "class.puyo.NextPieceContainer"
 
 local Wall = require "class.Wall"
 
 local PuyoPlayfield = CLASS("PuyoPlayfield", _Playfield)
 
-function PuyoPlayfield:initialize(game, x, y, columns, rows, player)
+function PuyoPlayfield:initialize(game, x, y, columns, rows, player, randomizer)
     self.game = game
     self.x = x
     self.y = y
     self.columns = columns
     self.rows = rows
     self.player = player
+    self.randomizer = randomizer
 
-    self.colors = {
-        {1, 0, 0},
-        {0, 1, 0},
-        {0, 0, 1},
-        {1, 1, 0},
-        {1, 0, 1}
-    }
     self.queuedGarbage = 0
 
     self.world = love.physics.newWorld(0, GRAVITY)
@@ -43,6 +38,10 @@ function PuyoPlayfield:initialize(game, x, y, columns, rows, player)
 
     self.puyos = {}
     self.puyoGroups = {}
+
+    self.pieceCount = 0
+
+    self.nextPieceContainer = NextPieceContainer:new(self, 0, 0)
 
     self:nextPuyo()
 end
@@ -130,6 +129,8 @@ function PuyoPlayfield:draw()
     love.graphics.push()
     love.graphics.translate(self.x, self.y)
 
+    self.nextPieceContainer:draw()
+
     local x1, y1 = game.camera:cameraCoords(self.x, self.y)
     local x2, y2 = game.camera:cameraCoords(self.x + self.columns*BLOCKSCALE, self.y + self.rows*BLOCKSCALE)
 
@@ -153,7 +154,7 @@ end
 function PuyoPlayfield:updatePuyoGroups()
     local colorGroups = {}
 
-    for i = 1, #self.colors do
+    for i = 1, #PUYOCOLORS do
         colorGroups[i] = {}
     end
 
@@ -285,19 +286,19 @@ function PuyoPlayfield:checkClearPuyos()
 end
 
 function PuyoPlayfield:nextPuyo()
+    self.pieceCount = self.pieceCount + 1
     self.activePuyoGroup = PuyoGroup:new(self,
-        {
-            {love.math.random(#self.colors)},
-            {love.math.random(#self.colors)},
-        })
-
+        self.randomizer:getPiece(self.pieceCount)
+    )
     for _, puyo in ipairs(self.activePuyoGroup.puyos) do
         table.insert(self.puyos, puyo)
     end
+
+    self.nextPieceContainer.group = self.randomizer:getPiece(self.pieceCount+1)
 end
 
 function PuyoPlayfield:getMaxSpeedY()
-    return 400
+    return 100
 end
 
 return PuyoPlayfield

@@ -3,7 +3,7 @@ local Puyo = CLASS("Puyo")
 Puyo.size = 10/6 / 2 -- radius
 Puyo.shape = love.physics.newCircleShape(Puyo.size*PHYSICSSCALE)
 
-local diameter = Puyo.size*PHYSICSSCALE*2
+Puyo.diameter = Puyo.size*PHYSICSSCALE*2
 
 function Puyo:initialize(playfield, type, offsetX, offsetY, group)
     self.playfield = playfield
@@ -12,7 +12,7 @@ function Puyo:initialize(playfield, type, offsetX, offsetY, group)
     self.group = group
     self.body = group.body
 
-    Puyo.shape:setPoint((offsetX or 0)*diameter, (offsetY or 0)*diameter)
+    Puyo.shape:setPoint((offsetX or 0)*self.diameter, (offsetY or 0)*self.diameter)
     self.fixture = love.physics.newFixture(self.body, Puyo.shape)
     self.fixture:setFriction(1)
     self.fixture:setRestitution(0.5)
@@ -45,7 +45,7 @@ function Puyo:draw()
     love.graphics.rotate(self.body:getAngle())
     love.graphics.translate(self.fixture:getShape():getPoint())
 
-    love.graphics.setColor(self.playfield.colors[self.type])
+    love.graphics.setColor(PUYOCOLORS[self.type])
     love.graphics.circle("fill", 0, 0, self.size*PHYSICSSCALE)
 
     love.graphics.pop()
@@ -54,7 +54,7 @@ function Puyo:draw()
     for _, neighbouringPuyo in ipairs(self.neighbouringPuyos) do
         local x1, y1 = self.body:getWorldPoint(self.fixture:getShape():getPoint())
 
-        love.graphics.setLineWidth(30*(1-(neighbouringPuyo.distance-diameter) / (PUYODISTANCE-diameter) ))
+        love.graphics.setLineWidth(30*(1-(neighbouringPuyo.distance-self.diameter) / (PUYODISTANCE-self.diameter) ))
         local x2, y2 = neighbouringPuyo.puyo.body:getWorldPoint(neighbouringPuyo.puyo.fixture:getShape():getPoint())
 
         love.graphics.line(x1, y1, x2, y2)

@@ -32,7 +32,7 @@ function TetrisPlayfield:initialize(game, x, y, columns, rows, player, randomize
 
     self.score = 0
     self.lines = 0
-    self.piececount = 0
+    self.pieceCount = 0
 
     self.queuedGarbage = 0
 
@@ -275,8 +275,8 @@ function TetrisPlayfield:updateLines()
 end
 
 function TetrisPlayfield:nextPiece(first)
-    self.piececount = self.piececount + 1
-    local pieceNum = self.randomizer:getPiece(self.piececount, self.mirrored)
+    self.pieceCount = self.pieceCount + 1
+    local pieceNum = self.randomizer:getPiece(self.pieceCount, self.mirrored)
     local piece = Piece.fromPieceType(self, pieceTypes[pieceNum])
 
     if first then
@@ -288,7 +288,7 @@ function TetrisPlayfield:nextPiece(first)
     table.insert(self.pieces, piece)
 
     -- update NEXT
-    self.nextPieceContainer.pieceType = pieceTypes[self.randomizer:getPiece(self.piececount+1, self.mirrored)]
+    self.nextPieceContainer.pieceType = pieceTypes[self.randomizer:getPiece(self.pieceCount+1, self.mirrored)]
 end
 
 function TetrisPlayfield:gameOver()

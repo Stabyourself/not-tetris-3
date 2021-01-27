@@ -1,10 +1,10 @@
-local Randomizer = CLASS("_Randomizer")
+local TetrisRandomizer = CLASS("_TetrisRandomizer")
 
 local mirrorTable = {
     1, 6, 5, 4, 3, 2, 7
 }
 
-function Randomizer:initialize()
+function TetrisRandomizer:initialize()
     self.list = {}
 
     local seed = love.timer.getTime()
@@ -15,7 +15,7 @@ function Randomizer:initialize()
     self.randomizer = love.math.newRandomGenerator(seed)
 end
 
-function Randomizer:getPiece(i, mirrored)
+function TetrisRandomizer:getPiece(i, mirrored)
     local piece
     if self.list[i] then
         piece = self.list[i]
@@ -30,13 +30,13 @@ function Randomizer:getPiece(i, mirrored)
     return piece
 end
 
-function Randomizer:generatePiece()
+function TetrisRandomizer:generatePiece()
     error("_Randomizer was used to generate a piece. This shouldn't happen.")
     return 4 -- guaranteed to be random.
 end
 
-function Randomizer:getLastPiece()
+function TetrisRandomizer:getLastPiece()
     return self.list[#self.list]
 end
 
-return Randomizer
+return TetrisRandomizer

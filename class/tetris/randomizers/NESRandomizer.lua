@@ -1,6 +1,6 @@
-local _Randomizer = require "class.tetris.randomizers._Randomizer"
+local _TetrisRandomizer = require "class.tetris.randomizers._TetrisRandomizer"
 
-local NESRandomizer = CLASS("NESRandomizer", _Randomizer)
+local NESRandomizer = CLASS("NESRandomizer", _TetrisRandomizer)
 
 function NESRandomizer:generatePiece()
     local piece

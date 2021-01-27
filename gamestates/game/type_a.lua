@@ -3,6 +3,7 @@ local game_a = CLASS("game_a", _game)
 local TetrisPlayfield = require "class.tetris.TetrisPlayfield"
 local PuyoPlayfield = require "class.puyo.PuyoPlayfield"
 local NESRandomizer = require "class.tetris.randomizers.NESRandomizer"
+local PuyoRandomizer = require "class.puyo.randomizers.PuyoRandomizer"
 local blockGraphicPacks = require "blockGraphicsPackLoader"
 
 local backgroundImg = love.graphics.newImage("img/type_a.png")
@@ -21,7 +22,11 @@ function game_a:enter(previous, level)
     -- self.playfields[1].areaIndicatorsY = 0
     -- self.playfields[1].areaIndicatorsWidth = 8
 
-    table.insert(self.playfields, PuyoPlayfield:new(self, 95, 41, 10.25, 20, CONTROLS[1]))
+
+    self.randomizer = PuyoRandomizer:new()
+    table.insert(self.playfields, PuyoPlayfield:new(self, 95, 41, 10.25, 20, CONTROLS[1], self.randomizer))
+    self.playfields[1].nextPieceContainer.x = 113
+    self.playfields[1].nextPieceContainer.y = 79
 
     self.gameOver = false
 end
