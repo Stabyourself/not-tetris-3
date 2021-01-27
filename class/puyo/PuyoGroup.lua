@@ -21,7 +21,10 @@ end
 function PuyoGroup:split()
     for _, puyo in ipairs(self.puyos) do
         local x, y = puyo.body:getWorldPoint(puyo.fixture:getShape():getPoint())
+
         local vx, vy = puyo.body:getLinearVelocity()
+        local friction = puyo.fixture:getFriction()
+        local restitution = puyo.fixture:getRestitution()
 
         puyo.body = love.physics.newBody(self.playfield.world, x, y, "dynamic")
         puyo.body:setLinearVelocity(vx, vy)
@@ -31,7 +34,8 @@ function PuyoGroup:split()
         puyo.fixture:destroy()
 
         puyo.fixture = love.physics.newFixture(puyo.body, Puyo.shape)
-        puyo.fixture:setRestitution(0.5)
+        puyo.fixture:setRestitution(restitution)
+        puyo.fixture:setFriction(friction)
     end
 
     self.body:destroy()

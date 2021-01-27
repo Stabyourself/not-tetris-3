@@ -14,7 +14,7 @@ function Puyo:initialize(playfield, type, offsetX, offsetY, group)
 
     Puyo.shape:setPoint((offsetX or 0)*self.diameter, (offsetY or 0)*self.diameter)
     self.fixture = love.physics.newFixture(self.body, Puyo.shape)
-    self.fixture:setFriction(1)
+    self.fixture:setFriction(0.5)
     self.fixture:setRestitution(0.5)
 
     self.body:setUserData(self)
